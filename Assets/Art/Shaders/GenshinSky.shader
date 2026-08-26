@@ -39,6 +39,10 @@ Shader "Basics/GenshinSky"
         _GalaxyNoiseSpeed("Galaxy Noise Speed", Vector) = (0, 0.67, 0, 0)
         _GalaxyNoiseSpeed2("Galaxy Noise Speed2", Vector) = (0.5, 0.67, 0, 0)
         
+        _NumOfInScatterPoints("Number of In Scattering Points", Float) = 1
+        _RayLength("Ray Length", Float) = 10
+        _SunRayLength("Sun Ray Length", Float) = 15
+        _PlanetRadius("PlanetRadius", Float) = 50
     }
     SubShader
     {
@@ -99,6 +103,12 @@ Shader "Basics/GenshinSky"
             float _GalaxyNoiseScale;
             float2 _GalaxyNoiseSpeed;
             float2 _GalaxyNoiseSpeed2;
+            
+            float _NumOfInScatterPoints;
+            float _RayLength;
+            float _SunRayLength;
+            float _PlanetRadius;
+            float _DensityScaleHeight;
 
             CBUFFER_END
             
@@ -125,6 +135,7 @@ Shader "Basics/GenshinSky"
             {
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
+                float3 viewWS : TEXCOORD1;
             };
 
             v2f vert(appdata v)
@@ -133,10 +144,54 @@ Shader "Basics/GenshinSky"
 
                 o.positionCS = TransformObjectToHClip(v.positionOS.xyz);
                 o.positionWS = TransformObjectToWorld(v.positionOS.xyz);
+                o.viewWS = GetWorldSpaceViewDir(o.positionWS);
                 
                 return o;
             }
-
+            
+            //refs 
+            //Genshin Sky Recreation: https://zhuanlan.zhihu.com/p/540692272 
+            //Rayleigh Scattering: https://www.youtube.com/watch?v=DxfEbulyFcY
+            
+            //Atmospheric Scattering Calculations
+            //ray origin and ray dir is your camera
+            //ray length shoots to outside atmosphere usualy if it doesnt hit anything
+            float calcScattering(float3 rayOrigin, float3 rayDir, float rayLength) 
+            {
+                float3 inScatterPoint = rayOrigin;
+                float stepSize = rayLength / (_NumOfInScatterPoints - 1); //-1 cause u calc the distance between them not the points 
+                                                                          //this comment is here because i am stupid
+                float inScatteredLight = 0;                               
+                for (int i = 0; i < _NumOfInScatterPoints; i++)
+                {
+                    float sunRayLength = _SunRayLength; //usualy we need to check distance through the whole atmosphere but since we dont have real planets it not needed 
+                    
+                    float sunRayOpticalDepth = opticalDepth(inScatterPoint, dirToSun, _SunRayLength); //density along ray also known as optical depth
+                                                                                                      //how much air did the ray pass through?? some sort of other density idk
+                    
+                    float viewRayOpticalDepth = opticalDepth(inScatterPoint, -rayDir, stepSize * i); //as the light scatters some goes to view as well
+                    
+                    float transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth)); //when optical depth is 0 transimittance is 1 cause all light reaches 
+                                                                                            //as optical depth increase more light scattering
+                    
+                    float localDensity = densityAtPoint(inScatterPoint); //greater density more scattering
+                    
+                    inScatteredLight += localDensity * transmittance * stepSize;
+                    inScatterPoint += rayDir * stepSize; //move the point towards rayDir by stepSize
+                }
+                
+                return inScatteredLight;
+            }
+            
+            float densityAtPoint(float3 densitySamplePoint) //less dense high up in sky more dense near ground
+            {
+                float3 planetCentre = float3(0, -_PlanetRadius, 0); //Just use a random planet radius cause we dont have a actual planet
+                float heightAboveSurface = distance(densitySamplePoint, planetCentre) - _PlanetRadius;
+                float localDensity = exp(heightAboveSurface / _DensityScaleHeight);
+                
+                                                    
+            }
+            
             float4 frag(v2f i) : SV_TARGET
             {
                 float3 positionWS = normalize(i.positionWS);
@@ -225,7 +280,8 @@ Shader "Basics/GenshinSky"
                 
                 float3 finalColor = sunFinalColor + moonFinalColor + finalSkyColor + finalStarGalaxyColor;
                 //finalColor = float4(galaxyTexture.rgb, 1.0);
-                return float4(finalColor, 1.0);
+                return float4(positionWS* 0.5 + 0.5, 1);
+                //return float4(finalColor, 1.0);
             }
 
             ENDHLSL
