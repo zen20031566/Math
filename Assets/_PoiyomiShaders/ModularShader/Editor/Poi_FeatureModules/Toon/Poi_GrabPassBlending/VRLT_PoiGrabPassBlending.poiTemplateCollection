@@ -1,0 +1,429 @@
+#T#PoiGrabPassBlendingProperties
+//ifex _EnableGrabpass==0
+[ThryWideEnum(Texture, 0, Vertex Color, 1)]_GrabPassMaskType ("Mask Type", int) = 0
+[TextureKeyword][sRGBWarning][ThryRGBAPacker(R Mask, G Mask, B Mask, A Mask, Linear, false)]_GrabPassBlendMap ("Masks [Click to Expand]--{reference_properties:[_GrabPassBlendMapPan, _GrabPassBlendMapUV], condition_showS:_GrabPassMaskType==0}", 2D) = "white" { }
+[ThryHideInInspector][Vector2]_GrabPassBlendMapPan ("Panning", Vector) = (0, 0, 0, 0)
+[ThryHideInInspector][ThryWideEnum(UV0, 0, UV1, 1, UV2, 2, UV3, 3, Panosphere, 4, World Pos, 5, Local Pos, 8, Polar UV, 6, Distorted UV, 7, Matcap, 9, Screen Space, 10)] _GrabPassBlendMapUV ("UV", Int) = 0
+
+[HideInInspector] m_start_Refraction (" Refraction--{reference_property:_RefractionEnabled}", Float) = 0
+[ThryHideInInspector][ToggleUI] _RefractionEnabled ("Enable Refraction", Float) = 1
+_RefractionIndex ("Refraction", Range(0, 3)) = 1.333333
+_RefractionChromaticAberration ("Chromatic Aberration", Range(0, 1)) = 0
+_RefractionFresnelPower ("Fresnel Power", Range(0, 10)) = 0
+[HideInInspector] s_start_GrabRefractionMask (" Masks--{persistent_expand:true,default_expand:false}", Float) = 1
+[Enum(Off, 4, R, 0, G, 1, B, 2, A, 3)]_GrabRefractionMaskChannel ("Mask Channel", Int) = 4
+[ThryWideEnum(Off, 0, 1R, 1, 1G, 2, 1B, 3, 1A, 4, 2R, 5, 2G, 6, 2B, 7, 2A, 8, 3R, 9, 3G, 10, 3B, 11, 3A, 12, 4R, 13, 4G, 14, 4B, 15, 4A, 16)] _GrabRefractionGlobalMask ("Global Mask--{reference_property:_GrabRefractionGlobalMaskBlendType}", Int) = 0
+[ThryHideInInspector][ThryWideEnum(Add, 7, Subtract, 1, Multiply, 2, Divide, 3, Min, 4, Max, 5, Average, 6, Replace, 0)] _GrabRefractionGlobalMaskBlendType ("Blending", Int) = 2
+[ToggleUI]_GrabRefractionMaskInvert ("Invert", Float) = 0
+[HideInInspector] s_end_GrabRefractionMask ("Masks", Float) = 0
+[HideInInspector] m_end_Refraction ("Refraction", Float) = 0
+
+[HideInInspector] m_start_Blur (" Blur--{reference_property:_EnableBlur}", Float) = 0
+[HideInInspector][ThryToggle(CHROMATIC_ABERRATION_LOW)]_EnableBlur ("Enable Blur", Float) = 0
+[Helpbox(2, 2)] _RefractionCABlurHelp ("Chromatic Aberration and Blur cannot be used at the same time--{condition_showS:_RefractionChromaticAberration!=0 && _EnableBlur==1 && _RefractionEnabled==1}", Float) = 0
+[DoNotAnimate][ThryWideEnum(Sunflower, 0, Gaussian (Accurate), 1, Gaussian (Fast), 3, Hexagonal, 2)]_GrabBlurPattern ("Pattern", Int) = 3
+_GrabBlurDistance ("Blur Distance", Range(0, 1)) = 0
+[IntRange]_GrabBlurQuality ("Blur Quality", Range(1, 20)) = 10
+_GrabBlurFalloff ("Distance Scaling--{hover:Controls how much the blur changes over distance}", Range(0, 1)) = 0
+_GrabBlurUseSmoothness ("Use Smoothness", Range(0, 1)) = 0
+_GrabBlurPower ("Center Importance--{condition_showS:_GrabBlurPattern==0||_GrabBlurPattern==1||_GrabBlurPattern==3}", Range(0, 1)) = 0
+[ToggleUI]_GrabBlurUseDepth ("Use Depth--{hover:Reduces blur for surfaces closer to background}", Float) = 0
+[Helpbox(1, 2, 1)]_GrabBlurDepthWarning ("This part requires the depth buffer. Put the DepthGet.prefab on your avatar so depth works in all worlds.--{condition_showS:_GrabBlurUseDepth==1}", Int) = 0
+[PoiPrefabSpawner(23c61f8f4d0a87243a36c937bd3e1393)] _GrabBlurSpawnDepthGet ("Add DepthGet Prefab to Scene--{condition_showS:_GrabBlurUseDepth==1}", Float) = 0
+[Ramp4(unclampedW)]_GrabBlurDepthRamp ("Depth Ramp--{condition_showS:_GrabBlurUseDepth==1,hover:X/Y = min/max blur. Z/W = distance (meters) for 0 blur / full blur}", Vector) = (0, 1, 0, 1)
+[HideInInspector] s_start_GrabBlurMask (" Masks--{persistent_expand:true,default_expand:false}", Float) = 1
+[Enum(Off, 4, R, 0, G, 1, B, 2, A, 3)]_GrabBlurMaskChannel ("Mask Channel", Int) = 4
+[ThryWideEnum(Off, 0, 1R, 1, 1G, 2, 1B, 3, 1A, 4, 2R, 5, 2G, 6, 2B, 7, 2A, 8, 3R, 9, 3G, 10, 3B, 11, 3A, 12, 4R, 13, 4G, 14, 4B, 15, 4A, 16)] _GrabBlurGlobalMask ("Global Mask--{reference_property:_GrabBlurGlobalMaskBlendType}", Int) = 0
+[ThryHideInInspector][ThryWideEnum(Add, 7, Subtract, 1, Multiply, 2, Divide, 3, Min, 4, Max, 5, Average, 6, Replace, 0)] _GrabBlurGlobalMaskBlendType ("Blending", Int) = 2
+[ToggleUI]_GrabBlurMaskInvert ("Invert", Float) = 0
+[HideInInspector] s_end_GrabBlurMask ("Masks", Float) = 0
+[HideInInspector] m_end_Blur ("Blur", Float) = 0
+
+[HideInInspector] m_start_GrabpassColor ("Color", Float) = 0
+_GrabpassColor ("Color", Color) = (1, 1, 1, 1)
+_GrabPassBrightness ("Multiplicative Brightness", Float) = 1
+_GrabPassAddBrightness ("Additive Brightness", Float) = 0
+
+[HideInInspector] s_start_GrabPassHueShift ("Hue Shift--{reference_property:_GrabPassHueShiftToggle,persistent_expand:true,default_expand:true}", Float) = 1
+[HideInInspector][ThryToggleUI(true)] _GrabPassHueShiftToggle ("<size=13><b>  Hue Shift</b></size>", Float) = 0
+[ThryWideEnum(OKLab, 0, HSV, 1)] _GrabPassHueShiftColorSpace ("Color Space", Int) = 0
+[ThryWideEnum(Hue Select, 0, Hue Shift, 1)] _GrabPassHueSelectOrShift ("Select or Shift", Int) = 1
+_GrabPassHueShift ("Hue Shift", Range(0, 1)) = 0
+_GrabPassHueShiftSpeed ("Hue Shift Speed", Float) = 0
+[HideInInspector] s_end_MainHueShift ("Hue Shift", Float) = 0
+
+[HideInInspector] s_start_GrabColorMask (" Masks--{persistent_expand:true,default_expand:false}", Float) = 1
+[Enum(Off, 4, R, 0, G, 1, B, 2, A, 3)]_GrabColorMaskChannel ("Mask Channel", Int) = 4
+[ThryWideEnum(Off, 0, 1R, 1, 1G, 2, 1B, 3, 1A, 4, 2R, 5, 2G, 6, 2B, 7, 2A, 8, 3R, 9, 3G, 10, 3B, 11, 3A, 12, 4R, 13, 4G, 14, 4B, 15, 4A, 16)] _GrabColorGlobalMask ("Global Mask--{reference_property:_GrabColorGlobalMaskBlendType}", Int) = 0
+[ThryHideInInspector][ThryWideEnum(Add, 7, Subtract, 1, Multiply, 2, Divide, 3, Min, 4, Max, 5, Average, 6, Replace, 0)] _GrabColorGlobalMaskBlendType ("Blending", Int) = 2
+[ToggleUI]_GrabColorMaskInvert ("Invert", Float) = 0
+[HideInInspector] s_end_GrabColorMask ("Masks", Float) = 0
+[HideInInspector] m_end_GrabpassColor ("Color", Float) = 0
+
+[HideInInspector] m_start_GrabPassAdvanced ("Alpha", Float) = 0
+_GrabPassBlendFactor ("Alpha Blend", Range(0, 1)) = 1
+[Enum(UnityEngine.Rendering.BlendMode)] _GrabSrcBlend ("Source Blend", Int) = 5
+[Enum(UnityEngine.Rendering.BlendMode)] _GrabDstBlend ("Destination Blend", Int) = 10
+[HideInInspector] s_start_GrabAlphaMask (" Masks--{persistent_expand:true,default_expand:false}", Float) = 1
+[Enum(Off, 4, R, 0, G, 1, B, 2, A, 3)]_GrabAlphaMaskChannel ("Mask Channel", Int) = 0
+[ThryWideEnum(Off, 0, 1R, 1, 1G, 2, 1B, 3, 1A, 4, 2R, 5, 2G, 6, 2B, 7, 2A, 8, 3R, 9, 3G, 10, 3B, 11, 3A, 12, 4R, 13, 4G, 14, 4B, 15, 4A, 16)] _GrabAlphaGlobalMask ("Global Mask--{reference_property:_GrabAlphaGlobalMaskBlendType}", Int) = 0
+[ThryHideInInspector][ThryWideEnum(Add, 7, Subtract, 1, Multiply, 2, Divide, 3, Min, 4, Max, 5, Average, 6, Replace, 0)] _GrabAlphaGlobalMaskBlendType ("Blending", Int) = 2
+[ToggleUI]_GrabAlphaMaskInvert ("Invert", Float) = 0
+[HideInInspector] s_end_GrabAlphaMask ("Masks", Float) = 0
+[HideInInspector] m_end_GrabPassAdvanced ("Alpha", Float) = 0
+//endex
+
+#T#PoiGrabPassBlendingKeywords
+//ifex _EnableGrabpass==0
+#define POI_GRABPASS
+#pragma shader_feature CHROMATIC_ABERRATION_LOW
+#pragma shader_feature PROP_GRABPASSBLENDMAP
+//endex
+
+#T#PoiGrabPassBlendingVariables
+//ifex _EnableGrabpass==0
+#if POI_PIPE == POI_BIRP
+	#if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+		Texture2DArray _PoiGrab2;
+	#else
+		Texture2D _PoiGrab2;
+	#endif
+
+	float4 _PoiGrab2_TexelSize;
+
+	#define _PoiOpaqueTex           _PoiGrab2
+	#define _PoiOpaqueTex_TexelSize _PoiGrab2_TexelSize
+#elif POI_PIPE == POI_URP
+	TEXTURE2D_X(_CameraOpaqueTexture);
+	float4 _CameraOpaqueTexture_TexelSize;
+	#define _PoiOpaqueTex           _CameraOpaqueTexture
+	#define _PoiOpaqueTex_TexelSize _CameraOpaqueTexture_TexelSize
+#endif
+
+#if defined(PROP_GRABPASSBLENDMAP) || !defined(OPTIMIZER_ENABLED)
+	Texture2D _GrabPassBlendMap;
+#endif
+float4 _GrabPassBlendMap_ST;
+//endex
+
+#T#PoiGrabPassBlendingVariablesExposed
+//ifex _EnableGrabpass==0
+int _GrabPassMaskType;
+float2 _GrabPassBlendMapPan;
+float _GrabPassBlendMapUV;
+int _GrabRefractionMaskChannel;
+int _GrabBlurMaskChannel;
+int _GrabColorMaskChannel;
+int _GrabAlphaMaskChannel;
+half _GrabRefractionGlobalMask;
+float _GrabRefractionGlobalMaskBlendType;
+half _GrabBlurGlobalMask;
+float _GrabBlurGlobalMaskBlendType;
+half _GrabColorGlobalMask;
+float _GrabColorGlobalMaskBlendType;
+half _GrabAlphaGlobalMask;
+float _GrabAlphaGlobalMaskBlendType;
+half _GrabRefractionMaskInvert;
+half _GrabBlurMaskInvert;
+half _GrabColorMaskInvert;
+half _GrabAlphaMaskInvert;
+
+float _RefractionIndex;
+float _RefractionChromaticAberration;
+float _RefractionEnabled;
+float _GrabSrcBlend;
+float _GrabDstBlend;
+half _GrabPassBlendFactor;
+float _GrabBlurPattern;
+float _GrabBlurDistance;
+float _GrabBlurQuality;
+half _GrabBlurUseSmoothness;
+float _GrabBlurPower;
+float _GrabBlurFalloff;
+float _GrabBlurUseDepth;
+float4 _GrabBlurDepthRamp;
+float _EnableGrabpass;
+half _RefractionFresnelPower;
+
+half4 _GrabpassColor;
+half _GrabPassBrightness;
+half _GrabPassAddBrightness;
+
+float _GrabPassHueShiftToggle;
+half _GrabPassHueShiftColorSpace;
+float _GrabPassHueSelectOrShift;
+half _GrabPassHueShift;
+float _GrabPassHueShiftSpeed;
+//endex
+
+#T#PoiGrabPassBlendingFunctions
+//ifex _EnableGrabpass==0
+#define POI_GRAB_BLUR_MAX_QUALITY 20
+#define POI_GRAB_BLUR_MAX_SAMPLES (POI_GRAB_BLUR_MAX_QUALITY * POI_GRAB_BLUR_MAX_QUALITY)
+#define POI_GRAB_BLUR_MAX_BAKED_SAMPLES 32
+
+// Progressive Vogel-disk kernel. XY contains the baked sample direction/radius;
+// ZW contains Gaussian weights for Center Importance 0 and 1 respectively.
+// Bit-reversed radial strata keep every 4/8/16/32-sample prefix well distributed.
+static const float4 POI_GRAB_BLUR_GAUSSIAN_KERNEL[32] =
+{
+	float4(0.12500000, 0.00000000, 0.95420667, 0.88249690),
+	float4(-0.52948271, 0.48504954, 0.21291229, 0.01616349),
+	float4(0.04505819, -0.51341480, 0.45073531, 0.11943297),
+	float4(0.53238400, 0.69440066, 0.10057264, 0.00218749),
+	float4(-0.36926756, -0.06531823, 0.65581601, 0.32465247),
+	float4(0.67533375, -0.42959205, 0.14633233, 0.00594622),
+	float4(-0.16225269, 0.60357192, 0.30978555, 0.04393693),
+	float4(-0.43497146, -0.83751109, 0.06912250, 0.00080473),
+	float4(0.26254828, 0.09588221, 0.79106511, 0.53526143),
+	float4(-0.70282181, 0.29011463, 0.17651048, 0.00980366),
+	float4(0.24278830, -0.51882448, 0.37367270, 0.07243976),
+	float4(0.27235243, 0.86830246, 0.08337765, 0.00132678),
+	float4(-0.38994542, -0.22598134, 0.54369057, 0.19691168),
+	float4(0.81896753, -0.18004771, 0.12131376, 0.00360656),
+	float4(-0.38714585, 0.55067512, 0.25682124, 0.02664910),
+	float4(-0.12546257, -0.96818601, 0.05730456, 0.00048810),
+	float4(0.16555136, 0.13952687, 0.86881506, 0.68728928),
+	float4(-0.73887847, 0.03055494, 0.19385884, 0.01258814),
+	float4(0.38621448, -0.38433498, 0.41039917, 0.09301449),
+	float4(-0.04123412, 0.89172571, 0.09157243, 0.00170362),
+	float4(-0.26562398, -0.31830630, 0.59712727, 0.25283960),
+	float4(0.81235959, 0.10930184, 0.13323710, 0.00463092),
+	float4(-0.53316313, 0.37096102, 0.28206295, 0.03421812),
+	float4(0.21073355, -0.93673175, 0.06293675, 0.00062673),
+	float4(0.16442712, 0.28694725, 0.72027298, 0.41686202),
+	float4(-0.74369556, -0.23725917, 0.16071463, 0.00763509),
+	float4(0.54420167, -0.25143497, 0.34023286, 0.05641614),
+	float4(-0.35788821, 0.85515556, 0.07591621, 0.00103330),
+	float4(-0.16385250, -0.45555171, 0.49503590, 0.15335497),
+	float4(0.75856913, 0.39868268, 0.11045744, 0.00280879),
+	float4(-0.67298264, 0.17739606, 0.23383840, 0.02075434),
+	float4(0.53659582, -0.83452977, 0.05217640, 0.00038013)
+};
+
+half4 grabpassBlur(float2 uv, float camDistance, half smoothness, half depthFade, half blurMask)
+{
+	half roughnessInfluence = lerp(1, 1 - smoothness, _GrabBlurUseSmoothness);
+	float effectiveDistance = lerp(1, camDistance, _GrabBlurFalloff);
+	float scale = WorldToScreenScale(_GrabBlurDistance * roughnessInfluence * depthFade * blurMask * 0.1, effectiveDistance);
+	float2 aspectCorrect = GetScreenAspectCorrection();
+	float sourceTexelRadius = abs(scale) * _PoiOpaqueTex_TexelSize.w;
+	if (sourceTexelRadius < 1.0)
+		return POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, uv);
+	
+	half4 color = 0;
+	half totalWeight = 0;
+	int quality = min((int)floor(_GrabBlurQuality), POI_GRAB_BLUR_MAX_QUALITY);
+	int maxSamples = quality * quality;
+	float blurPixelRadius = scale * _ScreenParams.y;
+	int samples = min((int)clamp(ceil(UNITY_PI * blurPixelRadius * blurPixelRadius), 4.0, (float)maxSamples), POI_GRAB_BLUR_MAX_SAMPLES);
+
+	switch (_GrabBlurPattern)
+	{
+		case 0: // Sunflower - Golden angle spiral
+		{
+			const float goldenAngle = 2.39996323;
+			[loop]
+			for (int i = 0; i < samples; i++)
+			{
+				float r = sqrt((i + 0.5) / samples);
+				float theta = i * goldenAngle;
+				float adjustedR = pow(r, _GrabBlurPower + 1);
+				float2 offset = float2(cos(theta), sin(theta)) * adjustedR * scale * aspectCorrect;
+				half weight = 1.0 - r * _GrabBlurPower;
+				color += POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, uv + offset) * weight;
+				totalWeight += weight;
+			}
+			break;
+		}
+		case 1: // Gaussian - Spiral with gaussian weights
+		{
+			const float goldenAngle = 2.39996323;
+			[loop]
+			for (int i = 0; i < samples; i++)
+			{
+				float r = sqrt((i + 0.5) / samples);
+				float theta = i * goldenAngle;
+				float2 offset = float2(cos(theta), sin(theta)) * r * scale * aspectCorrect;
+				half weight = exp(-r * r * (3.0 + _GrabBlurPower * 5.0));
+				color += POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, uv + offset) * weight;
+				totalWeight += weight;
+			}
+			break;
+		}
+		case 2: // Hexagonal Bokeh - 6-sided shape (point at bottom)
+		{
+			const float goldenAngle = 2.39996323;
+			const float hexRotation = UNITY_PI / 6.0;
+			[loop]
+			for (int i = 0; i < samples; i++)
+			{
+				float r = sqrt((i + 0.5) / samples);
+				float theta = i * goldenAngle;
+				float2 dir = float2(cos(theta), sin(theta));
+				float sectorAngle = atan2(dir.y, dir.x) + hexRotation;
+				float angleInSector = fmod(abs(sectorAngle), UNITY_PI / 3.0) - UNITY_PI / 6.0;
+				float hexScale = cos(UNITY_PI / 6.0) / cos(angleInSector);
+				float2 offset = dir * r * hexScale * scale * aspectCorrect;
+				color += POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, uv + offset);
+				totalWeight += 1.0;
+			}
+			break;
+		}
+		case 3: // Gaussian - baked progressive kernel
+		{
+			int sampleBudget = min(_GrabBlurQuality <= 4 ? 4 : (_GrabBlurQuality <= 8 ? 8 : (_GrabBlurQuality <= 16 ? 16 : 32)), POI_GRAB_BLUR_MAX_BAKED_SAMPLES);
+			float coveredSamples = ceil(UNITY_PI * sourceTexelRadius * sourceTexelRadius);
+			int bakedSamples = 4;
+			if (sampleBudget >= 8 && coveredSamples > 4.0) bakedSamples = 8;
+			if (sampleBudget >= 16 && coveredSamples > 8.0) bakedSamples = 16;
+			if (sampleBudget >= 32 && coveredSamples > 16.0) bakedSamples = 32;
+			bakedSamples = min(bakedSamples, POI_GRAB_BLUR_MAX_BAKED_SAMPLES);
+
+			half2 bakedWeightSums = bakedSamples == 4 ? float2(1.71842691, 1.02028086) :
+				(bakedSamples == 8 ? float2(2.89948330, 1.39562121) :
+				(bakedSamples == 16 ? float2(5.30323938, 2.24210826) : float2(10.13189379, 3.98826393)));
+
+			[loop]
+			for (int i = 0; i < bakedSamples; i++)
+			{
+				half4 kernel = POI_GRAB_BLUR_GAUSSIAN_KERNEL[i];
+				half weight = lerp(kernel.z, kernel.w, _GrabBlurPower);
+				float2 offset = kernel.xy * scale * aspectCorrect;
+				color += POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, uv + offset) * weight;
+			}
+			totalWeight = lerp(bakedWeightSums.x, bakedWeightSums.y, _GrabBlurPower);
+			break;
+		}
+		default:
+			return POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, uv);
+	}
+
+	color /= max(totalWeight, EPSILON);
+	return color;
+}
+
+float getGrabBlurDepthFade(float2 screenPos, float4 direction, float3 fragmentWorldPos)
+{
+	if (_GrabBlurUseDepth < 0.5) return 1;
+	if (!DepthTextureExists()) return 1;
+	
+	float z = SampleScreenDepth(screenPos);
+	
+	float backgroundDepth = CorrectedLinearEyeDepth(z, direction.w);
+	float3 backgroundWorldPos = direction.xyz * backgroundDepth + getCameraPosition(false);
+	float depthDiff = distance(backgroundWorldPos, fragmentWorldPos);
+	
+	return lerp(_GrabBlurDepthRamp.x, _GrabBlurDepthRamp.y, smoothstep(_GrabBlurDepthRamp.z, _GrabBlurDepthRamp.w, depthDiff));
+}
+
+inline half4 Refraction(float indexOfRefraction, half chromaticAberration, float camDistance, float4 direction, in PoiMesh poiMesh, in PoiCam poiCam, in PoiMods poiMods, inout PoiLight poiLight, in PoiFragData poiFragData, half refractionMask, half blurMask)
+{
+	half4 refractionColor;
+	float3 worldViewDir = normalize(PoiWorldSpaceViewDir(poiMesh.worldPos));
+	float3 refractionOffset = (((indexOfRefraction - 1.0) * mul(UNITY_MATRIX_V, float4(poiMesh.normals[1], 0.0)).xyz) * (1.0 - dot(poiMesh.normals[1], worldViewDir)));
+	float2 cameraRefraction = float2(refractionOffset.x, - (refractionOffset.y * _ProjectionParams.x)) * GetFOVScale() / max(camDistance, 1.0);
+	cameraRefraction *= pow(saturate(1.0 - poiLight.nDotV), _RefractionFresnelPower);
+
+	float2 bgRes = poiGetWidthAndHeight(_PoiOpaqueTex);
+	float aspect = bgRes.y / bgRes.x;
+	cameraRefraction.x *= aspect;
+	cameraRefraction *= refractionMask;
+
+	float2 refractedGrab = poiCam.screenUV + cameraRefraction;
+	float depthFade = getGrabBlurDepthFade(refractedGrab, direction, poiMesh.worldPos);
+
+	UNITY_BRANCH
+	if (_RefractionChromaticAberration > 0)
+	{
+		half4 redAlpha = POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, (poiCam.screenUV + cameraRefraction));
+		half green = POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, (poiCam.screenUV + (cameraRefraction * (1.0 - chromaticAberration)))).g;
+		half blue = POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, (poiCam.screenUV + (cameraRefraction * (1.0 + chromaticAberration)))).b;
+		refractionColor = float4(redAlpha.r, green, blue, redAlpha.a);
+	}
+	else
+	{
+		#ifdef CHROMATIC_ABERRATION_LOW
+			refractionColor = grabpassBlur(refractedGrab, camDistance, poiFragData.smoothness, depthFade, blurMask);
+		#else
+			refractionColor = POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, refractedGrab);
+		#endif
+	}
+	return refractionColor;
+}
+
+void applyGrabEffects(inout PoiFragData poiFragData, in PoiCam poiCam, in PoiMesh poiMesh, inout PoiLight poiLight, in PoiMods poiMods)
+{
+	half4 blendMask = 1;
+	#if defined(PROP_GRABPASSBLENDMAP) || !defined(OPTIMIZER_ENABLED)
+		if (_GrabPassMaskType == 0)
+			blendMask = POI2D_SAMPLER_PAN(_GrabPassBlendMap, _MainTex, poiUV(poiMesh.uv[_GrabPassBlendMapUV], _GrabPassBlendMap_ST), _GrabPassBlendMapPan);
+	#endif
+	if (_GrabPassMaskType == 1) blendMask = poiMesh.vertexColor;
+
+	half refractionMask = 1;
+	half blurMask       = 1;
+	half colorMask      = 1;
+	half alphaMask      = 1;
+
+	if (_GrabRefractionMaskChannel < 4) refractionMask = _GrabRefractionMaskInvert ? 1 - blendMask[min(_GrabRefractionMaskChannel, 3)] : blendMask[min(_GrabRefractionMaskChannel, 3)];
+	if (_GrabBlurMaskChannel < 4)       blurMask       = _GrabBlurMaskInvert       ? 1 - blendMask[min(_GrabBlurMaskChannel, 3)]       : blendMask[min(_GrabBlurMaskChannel, 3)];
+	if (_GrabColorMaskChannel < 4)      colorMask      = _GrabColorMaskInvert      ? 1 - blendMask[min(_GrabColorMaskChannel, 3)]      : blendMask[min(_GrabColorMaskChannel, 3)];
+	if (_GrabAlphaMaskChannel < 4)      alphaMask      = _GrabAlphaMaskInvert      ? 1 - blendMask[min(_GrabAlphaMaskChannel, 3)]      : blendMask[min(_GrabAlphaMaskChannel, 3)];
+
+	refractionMask = globalMaskBlend(refractionMask, _GrabRefractionGlobalMask, _GrabRefractionGlobalMaskBlendType, poiMods);
+	blurMask       = globalMaskBlend(blurMask,       _GrabBlurGlobalMask,       _GrabBlurGlobalMaskBlendType,       poiMods);
+	colorMask      = globalMaskBlend(colorMask,      _GrabColorGlobalMask,      _GrabColorGlobalMaskBlendType,      poiMods);
+	alphaMask      = globalMaskBlend(alphaMask,      _GrabAlphaGlobalMask,      _GrabAlphaGlobalMaskBlendType,      poiMods);
+	half blendFactor = lerp(0.0, (1 - poiFragData.alpha) * alphaMask, _GrabPassBlendFactor);
+
+	if (_RefractionEnabled >= 0.5)
+		poiLight.finalLighting = max(poiLight.finalLighting, EPSILON);
+
+	#ifdef POI_PASS_ADD
+		poiFragData.baseColor = poiBlend(_GrabSrcBlend, float4(poiFragData.baseColor, poiFragData.alpha), _GrabDstBlend, float4(0, 0, 0, 1), blendFactor).rgb;
+		return;
+	#endif
+
+	float camDistance = poiCam.distanceToVert;
+	
+	float perspectiveDivide = 1.0f / poiCam.clipPos.w;
+	float4 direction = poiCam.worldDirection * perspectiveDivide;
+	
+	half3 grabpassColor = 1;
+	UNITY_BRANCH
+	if (_RefractionEnabled >= 0.5)
+	{
+		grabpassColor = Refraction(_RefractionIndex, _RefractionChromaticAberration, camDistance, direction, poiMesh, poiCam, poiMods, poiLight, poiFragData, refractionMask, blurMask).rgb;
+	}
+	else
+	{
+		float depthFade = getGrabBlurDepthFade(poiCam.screenUV, direction, poiMesh.worldPos);
+		#ifdef CHROMATIC_ABERRATION_LOW
+			grabpassColor = grabpassBlur(poiCam.screenUV, camDistance, poiFragData.smoothness, depthFade, blurMask);
+		#else
+			grabpassColor = POI_SAMPLE_SCREEN(_PoiOpaqueTex, sampler_linear_clamp, poiCam.screenUV).rgb;
+		#endif
+	}
+
+	half3 tintedColor = (_GrabpassColor.rgb * grabpassColor * _GrabPassBrightness) + (_GrabPassAddBrightness * _GrabpassColor.rgb);
+
+	UNITY_BRANCH
+	if (_GrabPassHueShiftToggle >= 0.5)
+	{
+		tintedColor = hueShift(tintedColor, frac(_GrabPassHueShift + _GrabPassHueShiftSpeed * POI_TIME.x), _GrabPassHueShiftColorSpace, _GrabPassHueSelectOrShift);
+	}
+	grabpassColor = lerp(grabpassColor, tintedColor, colorMask);
+	#ifdef POI_PASS_BASE
+		poiFragData.baseColor = poiBlend(_GrabSrcBlend, float4(poiFragData.baseColor, poiFragData.alpha), _GrabDstBlend, float4(grabpassColor / poiLight.finalLighting, 1), blendFactor).rgb;
+	#endif
+}
+//endex
+
+#T#PoiGrabPassBlendingFunctionCalls
+//ifex _EnableGrabpass==0
+if (_EnableGrabpass >= 0.5)
+{
+	applyGrabEffects(poiFragData, poiCam, poiMesh, poiLight, poiMods);
+}
+//endex
