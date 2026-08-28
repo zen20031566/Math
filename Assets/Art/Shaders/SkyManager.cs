@@ -9,14 +9,15 @@ public class SkyManager : MonoBehaviour
     [SerializeField] float secondsPerGameHour = 600f; //10 min = 1 in game time
     [SerializeField] private Color dayColor = Color.white;
     [SerializeField] private Color nightColor = Color.darkBlue;
-    
+
     private void Update()
     {
         timeOfDay = (timeOfDay + Time.deltaTime * 1 / secondsPerGameHour) % 24f;
 
         HandleDirLight();
-        
-        Shader.SetGlobalMatrix(DirLightLToW, directionalLight.transform.localToWorldMatrix); //sends dir light transform matrix into shader
+
+        Shader.SetGlobalMatrix(DirLightLToW,
+            directionalLight.transform.localToWorldMatrix); //sends dir light transform matrix into shader
     }
 
     private void OnValidate()

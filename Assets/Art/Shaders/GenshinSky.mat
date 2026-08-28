@@ -118,6 +118,8 @@ Material:
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _AtmosphereHeight: 60
+    - _AtmosphereSize: 1
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
@@ -127,6 +129,8 @@ Material:
     - _Cutoff: 0.5
     - _DayHorizonStrength: 1.21
     - _DayHorizonWidth: 0.24
+    - _DensityFalloff: 222
+    - _DensityScaleHeight: 1.2
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -136,14 +140,26 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _GroundHeight: 0
     - _Metallic: 0
-    - _MoonSize: 0.035
+    - _MieBeta: 0.15
+    - _MieG: 0.003
+    - _MieScaleHeight: 12
+    - _MoonSize: 0.02
     - _NightHorizonStrength: 1.21
     - _NightHorizonWidth: 0.24
+    - _NumOfInScatterPoints: 16
+    - _NumOfOpticalDepthPoints: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.005
+    - _PlanetRadius: 6360
     - _QueueOffset: 0
+    - _RayLeighBeta: 0.15
+    - _RayLength: 10
+    - _RayleighScaleHeight: 80
     - _ReceiveShadows: 1
+    - _ReferenceHeight: 0.1
+    - _ScatteringStrength: 2
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -152,30 +168,36 @@ Material:
     - _StarBlinkRate: 1
     - _StarNoiseScale: 12
     - _SunInnerBound: 0
-    - _SunOuterBound: 0.35
-    - _SunSize: 0.04
+    - _SunIntensity: 2
+    - _SunOuterBound: 0.1
+    - _SunRayLength: 10
+    - _SunSize: 0.025
     - _Surface: 0
+    - _ViewRayLength: 10
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
+    - __ScatteringStrength: 2
     m_Colors:
     - _BaseColor: {r: 0.8301887, g: 0.5521538, b: 0.5521538, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DayBotColor: {r: 0.63529414, g: 0.8000001, b: 0.95294124, a: 1}
     - _DayHorizonColor: {r: 0.6367924, g: 0.8538903, b: 1, a: 1}
     - _DayMidColor: {r: 0.45098042, g: 0.7019608, b: 0.9725491, a: 1}
-    - _DayTopColor: {r: 0.045122836, g: 0.3709372, b: 0.735849, a: 1}
+    - _DayTopColor: {r: 0.047058824, g: 0.37254903, b: 0.7372549, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GalaxyColor: {r: 0.11506388, g: 0.08770915, b: 0.254717, a: 1}
     - _GalaxyColor1: {r: 0.40258992, g: 0.42251292, b: 0.7830189, a: 1}
     - _GalaxyNoiseSpeed: {r: 0, g: 0.067, b: 0, a: 0}
     - _GalaxyNoiseSpeed2: {r: 0.05, g: 0.067, b: 0, a: 0}
+    - _MieColor: {r: 1, g: 0.7892342, b: 0.0047169924, a: 1}
     - _MoonColor: {r: 4, g: 5.8, b: 5.8, a: 1}
     - _NightBotColor: {r: 0.06020826, g: 0.13525337, b: 0.31132078, a: 1}
     - _NightHorizonColor: {r: 0, g: 0.29786563, b: 0.509434, a: 1}
     - _NightMidColor: {r: 0.023529412, g: 0.07058824, b: 0.2, a: 1}
     - _NightTopColor: {r: 0.015686275, g: 0.03529412, b: 0.12156863, a: 1}
+    - _RayLeighBeta: {r: 0.0058, g: 0.0135, b: 0.0331, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SunColor: {r: 12, g: 6, b: 1, a: 1}
+    - _SunColor: {r: 15.999999, g: 9.693459, b: 2.1886795, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

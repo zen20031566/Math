@@ -1148,7 +1148,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 1
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.75417125, g: 0.7777071, b: 0.84711915, a: 1}
   m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
@@ -1211,7 +1211,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.68835455, y: -0, z: -0, w: 0.7253744}
+  m_LocalRotation: {x: 0.99965733, y: -0, z: -0, w: 0.026177114}
   m_LocalPosition: {x: 0, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1530,8 +1530,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkyManager
   directionalLight: {fileID: 410087040}
-  timeOfDay: 11.8
-  secondsPerGameHour: 600
+  timeOfDay: 17.8
+  secondsPerGameHour: 1
   dayColor: {r: 1, g: 1, b: 1, a: 1}
   nightColor: {r: 0.16567284, g: 0.24555194, b: 0.4811321, a: 1}
 --- !u!4 &668703816
