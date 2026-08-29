@@ -6,6 +6,8 @@ Shader "Basics/GenshinSky"
         _SunSize("Sun Size", Float) = 1
         _SunInnerBound("Sun Inner Bound", Float) = 0
         _SunOuterBound("Sun Outer Bound", Float) = 0.8
+    	_SunInfScale("Sun Inf Scale", Float) = 1
+    	[HDR] _SunInfColor("Sun Inf Color", Color) = (1, 1, 1, 1)
         
         _MoonTexture("Moon Texture", 2D) = "white" {}
         [HDR]_MoonColor("Moon Color", Color) = (4, 5.8, 5.8, 1)
@@ -15,7 +17,6 @@ Shader "Basics/GenshinSky"
         _DayBotColor("Day Bot Color", Color) = (0.30, 0.55, 0.90, 1)
         
         _NightTopColor("Night Top Color", Color) = (0.015, 0.035, 0.12, 1)
-        _NightMidColor("Night Mid Color", Color) = (0.025, 0.070, 0.22, 1)
         _NightBotColor("Night Bot Color", Color) = (0.08, 0.18, 0.42, 1)
         
         _DayHorizonWidth("Day Horizon Width", Float) = 0.12
@@ -43,7 +44,7 @@ Shader "Basics/GenshinSky"
         _DensityScaleHeight("Density Scale Height", Float) = 2
         _ScatteringStrength("Scattering Strength", Float) = 10
         _PlanetRadius("Planet Radius", Float) = 6000
-    	_MieColor("Mie Color", Color) = (1.00, 1.00, 1.00, 1)
+    	[HDR] _MieColor("Mie Color", Color) = (1.00, 1.00, 1.00, 1)
 
     }
     SubShader
@@ -74,6 +75,8 @@ Shader "Basics/GenshinSky"
             float _SunSize;
             float _SunInnerBound;
             float _SunOuterBound;
+            float _SunInfScale;
+            float4 _SunInfColor;
             
             float4 _MoonTexture_ST;
             float4 _MoonColor;
@@ -83,7 +86,6 @@ Shader "Basics/GenshinSky"
             float4 _DayBotColor;
             
             float4 _NightTopColor;
-            float4 _NightMidColor;
             float4 _NightBotColor;
 
             float _DayHorizonWidth;
@@ -190,13 +192,13 @@ Shader "Basics/GenshinSky"
 		        return float2(maxFloat, 0);
 	        }
             
-            float miePhase(float mu, float mieG)
-            {
-                float gg = mieG * mieG;
-                float num = 3.0 * (1.0 - gg) * (1.0 + mu * mu);
-                float den = 8.0 * PI * (2.0 + gg) * pow(max(1.0 + gg - 2.0 * mieG * mu, 1e-4), 1.5);
-                return num / den;
-            }
+            float miePhase(float cosAngle)
+			{
+				float g = _MieG;
+				float g2 = g * g;
+				float phase = (1.0 / (4.0 * PI)) * ((3.0 * (1.0 - g2)) / (2.0 * (2.0 + g2))) * ((1 + cosAngle * cosAngle) / (pow((1 + g2 - 2 * g*cosAngle), 3.0 / 2.0)));
+				return phase;
+			}
             
             float calcDensity(float3 position)
             {
@@ -212,7 +214,7 @@ Shader "Basics/GenshinSky"
                 
                 //I have no fking idea what his modifications do or why compared to tranditional atmospheric scattering papers
                 float mu = dot(rayDir, sunDir);
-                float miePhaseValue = miePhase(mu, _MieG);
+                float miePhaseValue = miePhase(mu);
                 
                 float mieScatterSum = 0;  
                 float sunMieOpticalDepth = 0;
@@ -286,6 +288,12 @@ Shader "Basics/GenshinSky"
                 //example if sun y <= -0.03 then full dark else if sun > 0.03 then normal sun color
                 float3 sunFinalColor = lerp(sunFallColor, _SunColor.rgb, sunFallBlend) * sunMask;
                 
+	        	//sunInfluence
+			    float sunMask2 = smoothstep(-0.4, 0.4, -mul(viewWS,_DirLightLToW).z) - 0.3; //how alligned the pixels dir to camera are to the sun dir
+	        	//matrix mul is same as dot the 2 dir its just u tranform the dir into the sun rotation space?
+			    float sunInfScaleMask = smoothstep(-0.01,0.1,mainLight.direction.y) * smoothstep(-0.4,-0.01,-mainLight.direction.y); //only shows when sun at horizon
+			    float3 finalSunInfColor = _SunInfColor * sunMask2 * _SunInfScale * sunInfScaleMask;
+	        	
                 //Moon
                 float3 sunUV = mul(positionWS.xyz, _DirLightLToW);
                 float2 moonUV = (sunUV.xy / _MoonSize) * 0.5 + 0.5; //scale by moon size and remap from -1 to 1 to 0 to 1
@@ -358,16 +366,16 @@ Shader "Basics/GenshinSky"
 	            float distThroughAtmosphere =  min(hitInfo.y, hitInfo.y * 100);
 	        	
 	        	if (distThroughAtmosphere > 0)
+	        	
 	        	{
 	        		 float3 inscattering = calcInScatteringLight(rayOrigin, viewWS, distThroughAtmosphere, mainLight.direction);
 					 scatteringColor = _MieColor * ACESFilm(inscattering) * _ScatteringStrength;
 	        	}
 
                 //Final 
-                float3 finalColor = sunFinalColor + moonFinalColor + finalSkyColor + finalStarGalaxyColor + scatteringColor;
-                
-                //finalColor = float4(galaxyTexture.rgb, 1.0);
-                //return float4(positionWS* 0.5 + 0.5, 1);
+                float3 finalColor = sunFinalColor + finalSunInfColor + moonFinalColor + finalSkyColor + finalStarGalaxyColor + scatteringColor;
+	        	
+	        	//float3 test = lerp(0, 1, sunInfScaleMask);
                 return float4(finalColor, 1.0);
             }
 

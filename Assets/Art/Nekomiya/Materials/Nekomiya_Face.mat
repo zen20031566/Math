@@ -596,7 +596,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ToonRamp:
-        m_Texture: {fileID: 2800000, guid: a1e4ba6cd2ee762488112e19d5c2de4f, type: 3}
+        m_Texture: {fileID: 2800000, guid: eb796fa86813b334fbd0f78ade6a0a52, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TruchetMask:
@@ -3101,7 +3101,7 @@ Material:
     - _ShadowOffset: 0
     - _ShadowPostAO: 0
     - _ShadowReceive: 0
-    - _ShadowStrength: 0.735
+    - _ShadowStrength: 0.81
     - _ShadowStrengthMaskUV: 0
     - _SkinThicknessMapInvert: 0
     - _SkinThicknessMapUV: 0
@@ -4832,7 +4832,7 @@ Material:
     - _MochieReflectionTint: {r: 1, g: 1, b: 1, a: 1}
     - _MochieSpecularTint: {r: 1, g: 1, b: 1, a: 1}
     - _MultilayerMathBlurMapPan: {r: 0, g: 0, b: 0, a: 0}
-    - _NormalCorrectOrigin: {r: 0, g: 0.4, b: -0.025, a: 1}
+    - _NormalCorrectOrigin: {r: 0.05, g: 0.4, b: -0.025, a: 1}
     - _OutlineDropShadowOffset: {r: 1, g: 0, b: 0, a: 0}
     - _OutlineMaskPan: {r: 0, g: 0, b: 0, a: 0}
     - _OutlinePersonaDirection: {r: 1, g: 1, b: 0, a: 0}
