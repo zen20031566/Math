@@ -46,6 +46,7 @@ Shader "Basics/PBR"
             }
 
             ZWrite On
+            
             ZTest LEqual
 
             HLSLPROGRAM

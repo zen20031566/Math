@@ -19,6 +19,7 @@ Shader "Basics/AlphaBlend" //In shader tab in materials this will show up so Fil
 		Pass //draw entire obj once to the screen //HLSL written here
 		{
 			Blend [_SrcBlend] [_DstBlend]
+			
 
 			HLSLPROGRAM
 			#pragma vertex vert

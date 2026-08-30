@@ -274,7 +274,7 @@ public class ThirdPersonCharacterController : MonoBehaviour
         }
 
         // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
-        if (verticalVelocity < terminalVelocity)
+        if (verticalVelocity > -terminalVelocity)
         {
             verticalVelocity += Gravity * Time.deltaTime;
         }

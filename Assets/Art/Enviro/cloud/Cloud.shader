@@ -99,6 +99,15 @@ Shader "Basics/Cloud"
                 
                 float3 weight;
                 
+                //Equal to below
+                // float rightAmount  = dot(mainLight.direction, i.tangentWS.xyz);
+                // float topAmount    = dot(mainLight.direction, bitangentWS.xyz);
+                // float frontAmount  = dot(mainLight.direction, normalWS.xyz);
+                //
+                // weight.x = (rightAmount > 0) ? RTBk.x : LBtF.x;
+                // weight.y = (topAmount  > 0) ? RTBk.y : LBtF.y;
+                // weight.z = (frontAmount  < 0) ? RTBk.z : LBtF.z;
+                //
                 weight.x = (tangentLightDir.x > 0) ? RTBk.x : LBtF.x; // right vs left
                 weight.y = (tangentLightDir.y > 0) ? RTBk.y : LBtF.y; // top vs bottom
                 weight.z = (tangentLightDir.z < 0) ? RTBk.z : LBtF.z; // back vs front //idk why its flipped i fked up somewhere but this fixes?

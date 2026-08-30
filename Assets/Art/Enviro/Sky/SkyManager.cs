@@ -5,6 +5,8 @@ public class SkyManager : MonoBehaviour
 {
     public Light directionalLight;
     private static readonly int DirLightLToW = Shader.PropertyToID("_DirLightLToW");
+    [SerializeField] private Transform cloudDome;
+    [SerializeField] private float cloudRotationSpeed = 1f;
     [SerializeField, Range(0f, 24f)]private float timeOfDay = 0;
     [SerializeField] float secondsPerGameHour = 600f; //10 min = 1 in game time
     [SerializeField] private Color dayLightColor = Color.white;
@@ -18,18 +20,22 @@ public class SkyManager : MonoBehaviour
     
     [SerializeField] private Color nightSkyColor = Color.white;
     [SerializeField] private Color nightHorizonColor = Color.darkBlue;
-
-
+    
+    private float yOffset;
+    private Transform player; 
     private void Start()
     {
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
+        player = GameObject.FindWithTag("Player").transform;
+        yOffset = cloudDome.position.y; 
     }
 
     private void Update()
     {
+        cloudDome.position = new Vector3(player.position.x, player.position.y + yOffset, player.position.z);
         timeOfDay = (timeOfDay + Time.deltaTime * 1 / secondsPerGameHour) % 24f;
-
+        cloudDome.Rotate(Vector3.up * cloudRotationSpeed * Time.deltaTime);
         HandleDirLight();
 
         Shader.SetGlobalMatrix(DirLightLToW,
@@ -45,6 +51,7 @@ public class SkyManager : MonoBehaviour
     {
         float angle = ((timeOfDay - 6) / 24f) * 360f; //minus 6 cause 6am is 0degree
         directionalLight.transform.rotation = Quaternion.Euler(angle, 0f, 0f);
+   
         
         float t = Mathf.InverseLerp(-0.3f, 0.25f, -directionalLight.transform.forward.y);
         float dayNightCycle = Mathf.SmoothStep(0f, 1f, t);
