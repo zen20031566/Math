@@ -2353,6 +2353,56 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &911461916
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 911461918}
+  - component: {fileID: 911461917}
+  m_Layer: 0
+  m_Name: GrassGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &911461917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911461916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4963287ec49629842b777e938d57dc42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrassGenerator
+  computeShader: {fileID: 7200000, guid: 4f0ed952ffab98a42906586cc5dacdb5, type: 3}
+  resolution: 100
+  material: {fileID: 2100000, guid: 2506e31e1e8215f419a2d3ae4dfbda72, type: 2}
+  mesh: {fileID: 6894428203817054813, guid: 58aee1d9690a56f4abc45fc22dad5e85, type: 3}
+  heightOffset: -0.2
+  alphaMapIndex: 0
+--- !u!4 &911461918
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911461916}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &961685547
 GameObject:
   m_ObjectHideFlags: 0
@@ -2707,9 +2757,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f47773ff3cb4db2409f157410f5cdeb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GPUGraph
-  resolution: 10
+  resolution: 300
   function: 0
-  computeShader: {fileID: 7200000, guid: d78ca15c01d741e4cbeecb719c01a677, type: 3}
+  computeShader: {fileID: 7200000, guid: 4045fc21c918da54cb26c73bf6648816, type: 3}
   functionDuration: 1
   material: {fileID: 2100000, guid: bac79ed68ca47f8458f7d624056f24b4, type: 2}
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
@@ -16712,3 +16762,4 @@ SceneRoots:
   - {fileID: 911285262}
   - {fileID: 527053870}
   - {fileID: 1951764235}
+  - {fileID: 911461918}

@@ -1,0 +1,59 @@
+#pragma kernel InitializeGrass
+
+#include "Assets/Art/Shaders/SimplexNoise3D.hlsl"
+#include "UnityCG.cginc"
+#define kMaxHeight (32766.0f/65535.0f) //needed for height map check TerrainTools docs
+
+struct GrassData 
+{
+    float4 position;
+    float2 uv;
+    float displacement;
+};
+
+uint _Resolution;
+RWStructuredBuffer<GrassData> _GrassDataBuffer;
+
+float3 _TerrainPosition;
+float3 _TerrainSize;
+float _HeightOffset;
+Texture2D<float4> _HeightMap;
+SamplerState sampler_HeightMap;
+
+Texture2D<float4> _AlphaMap;
+SamplerState sampler_AlphaMap;
+
+[numthreads(8,8,1)]
+void InitializeGrass(uint3 id : SV_DispatchThreadID) 
+{
+    //this gets index
+    //check if less than resolution to prevent out of bounds
+    if (id.x < _Resolution && id.y < _Resolution)
+    {
+        float2 uv = float2(id.xy) / (float(_Resolution) - 1); //terrain uv
+        
+        //Ignore this
+        // //Only paint on grass layer this assumes the r channel of this alphamap is the grass layer
+        // float4 alphaMap = _AlphaMap.SampleLevel(sampler_AlphaMap, uv, 0);
+        // float grassWeight = alphaMap.r;
+        // if (grassWeight > 0.5)
+        // {
+        //     
+        // }
+        
+        float3 position = _TerrainPosition;
+        position.xz += uv * _TerrainSize.xz;
+        
+        float4 heightMap = _HeightMap.SampleLevel(sampler_HeightMap, uv, 0);
+        float unpackHeight = UnpackHeightmap(heightMap); //needed check TerrainTools docs
+        float height = unpackHeight * (_TerrainSize.y / kMaxHeight);
+        position.y += height + _HeightOffset;
+        
+        GrassData grass;
+        grass.position = float4(position, 1.0);
+        grass.displacement = heightMap.r;
+        grass.uv = uv;
+
+        _GrassDataBuffer[id.x + id.y * _Resolution] = grass;
+    }
+}
