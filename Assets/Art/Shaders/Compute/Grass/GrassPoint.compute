@@ -2,13 +2,15 @@
 
 #include "Assets/Art/Shaders/SimplexNoise3D.hlsl"
 #include "UnityCG.cginc"
+#include "Assets/Art/Shaders/Random.cginc"
 #define kMaxHeight (32766.0f/65535.0f) //needed for height map check TerrainTools docs
 
 struct GrassData 
 {
     float4 position;
-    float2 uv;
-    float displacement;
+    float3 up;
+    float yawAngle;
+    float2 scale;
 };
 
 uint _Resolution;
@@ -16,44 +18,48 @@ RWStructuredBuffer<GrassData> _GrassDataBuffer;
 
 float3 _TerrainPosition;
 float3 _TerrainSize;
-float _HeightOffset;
-Texture2D<float4> _HeightMap;
-SamplerState sampler_HeightMap;
+float2 _Scale;
 
-Texture2D<float4> _AlphaMap;
-SamplerState sampler_AlphaMap;
+Texture2D<float4> _HeightMap;
+SamplerState _HeightMapPointClampSampler;
+
+Texture2D<float4> _NormalMap;
+SamplerState _NormalMapPointClampSampler;
 
 [numthreads(8,8,1)]
 void InitializeGrass(uint3 id : SV_DispatchThreadID) 
 {
     //this gets index
     //check if less than resolution to prevent out of bounds
-    if (id.x < _Resolution && id.y < _Resolution)
-    {
-        float2 uv = float2(id.xy) / (float(_Resolution) - 1); //terrain uv
-        
-        //Ignore this
-        // //Only paint on grass layer this assumes the r channel of this alphamap is the grass layer
-        // float4 alphaMap = _AlphaMap.SampleLevel(sampler_AlphaMap, uv, 0);
-        // float grassWeight = alphaMap.r;
-        // if (grassWeight > 0.5)
-        // {
-        //     
-        // }
-        
-        float3 position = _TerrainPosition;
-        position.xz += uv * _TerrainSize.xz;
-        
-        float4 heightMap = _HeightMap.SampleLevel(sampler_HeightMap, uv, 0);
-        float unpackHeight = UnpackHeightmap(heightMap); //needed check TerrainTools docs
-        float height = unpackHeight * (_TerrainSize.y / kMaxHeight);
-        position.y += height + _HeightOffset;
-        
-        GrassData grass;
-        grass.position = float4(position, 1.0);
-        grass.displacement = heightMap.r;
-        grass.uv = uv;
+    if (id.x >= _Resolution || id.y >= _Resolution) return;
+    uint index = id.x + id.y * _Resolution;
+    
+    GrassData grass = (GrassData)0;
+    
+    float2 uv = float2(id.xy) / (float(_Resolution) - 1); //uv space
+    
+    float jitterX = randValue(index) - 0.5f;
+    float jitterY = randValue(index + 1) - 0.5f;
+    float2 jitter = float2(jitterX, jitterY);
+    uv += jitter / _Resolution;
+    
+    float3 position = _TerrainPosition;
+    position.xz += uv * _TerrainSize.xz;
+    
+    float4 heightMapValue = _HeightMap.SampleLevel(_HeightMapPointClampSampler, uv, 0);
+    float unpackHeight = UnpackHeightmap(heightMapValue); //needed check TerrainTools docs
+    float height = unpackHeight * (_TerrainSize.y / kMaxHeight);
+    position.y += height;
+    
+    grass.position = float4(position, 1.0);
+    
+    grass.yawAngle = randValue(index) * 180.0;
+    
+    grass.scale = 1.0 + (randValue(index) - 0.5) * _Scale;
+    
+    float4 normalMapValue = _NormalMap.SampleLevel(_NormalMapPointClampSampler, uv, 0);
+    grass.up.xyz = normalMapValue.xyz;
 
-        _GrassDataBuffer[id.x + id.y * _Resolution] = grass;
-    }
+    _GrassDataBuffer[index] = grass;
+    
 }

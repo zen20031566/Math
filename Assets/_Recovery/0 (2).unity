@@ -2320,7 +2320,7 @@ Terrain:
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
-  m_DrawInstanced: 1
+  m_DrawInstanced: 0
   m_DrawTreesAndFoliage: 1
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
@@ -2383,7 +2383,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GrassGenerator
   computeShader: {fileID: 7200000, guid: 4f0ed952ffab98a42906586cc5dacdb5, type: 3}
-  resolution: 5
+  resolution: 300
   material: {fileID: 2100000, guid: 2506e31e1e8215f419a2d3ae4dfbda72, type: 2}
   mesh: {fileID: -462981019419857548, guid: 4f65a6d0c47645f44821fc682b4c0d94, type: 3}
   heightOffset: 0
@@ -5030,7 +5030,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1951764235
 Transform:
   m_ObjectHideFlags: 0
