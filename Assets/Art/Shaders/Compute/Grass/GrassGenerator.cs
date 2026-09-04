@@ -4,17 +4,18 @@ using UnityEngine;
 public class GrassGenerator : MonoBehaviour
 {
     [SerializeField] private ComputeShader computeShader;
-    [SerializeField] private int resolution = 10;
+    [SerializeField, Range(0, 1000)] private int resolution = 100;
     [SerializeField] private Material material;
     [SerializeField] private Mesh mesh;
+    
     [SerializeField] private Vector2 scale = Vector2.one;
-    [SerializeField] private Vector2 scaleVariation = Vector2.zero;
-    [SerializeField] private float heightOffset = -0.3f;
-    [SerializeField] private float heightVariation = 0;
+    [SerializeField] private Vector2 scaleVariationRange = new Vector2(0.6f, 1.0f);
     
     private ComputeBuffer grassDataBuffer;
     private ComputeBuffer argsBuffer;
 
+    private int kernel;
+    
     [SerializeField] private int alphaMapIndex;
     
     private Terrain terrain; 
@@ -24,8 +25,9 @@ public class GrassGenerator : MonoBehaviour
     
     void OnEnable()
     {
+        kernel = computeShader.FindKernel("InitializeGrass");
         terrain =  Terrain.activeTerrain;
-        grassDataBuffer = new ComputeBuffer(resolution * resolution, sizeof(float) * 10); //number of floats: position(float4) uv(float2) displacement(float) 4 + 2 + 1 = 7
+        grassDataBuffer = new ComputeBuffer(resolution * resolution, sizeof(float) * 12); //number of floats: position(float4) uv(float2) displacement(float) 4 + 2 + 1 = 7
         argsBuffer = new ComputeBuffer(1, sizeof(uint) * 5, ComputeBufferType.IndirectArguments);
         
         UpdateGrassBuffer();
@@ -42,11 +44,11 @@ public class GrassGenerator : MonoBehaviour
         if (grassDataBuffer == null || grassDataBuffer.count != resolution * resolution)
         {
             grassDataBuffer?.Release();
-            grassDataBuffer = new ComputeBuffer(resolution * resolution, sizeof(float) * 10);
+            grassDataBuffer = new ComputeBuffer(resolution * resolution, sizeof(float) * 12);
         }
 
         computeShader.SetInt("_Resolution", resolution);
-        computeShader.SetBuffer(0, "_GrassDataBuffer", grassDataBuffer);
+        computeShader.SetBuffer(kernel, "_GrassDataBuffer", grassDataBuffer);
         
         Vector3 terrainPosition = terrain.transform.position;
         Vector3 terrainSize = terrain.terrainData.size; 
@@ -56,13 +58,16 @@ public class GrassGenerator : MonoBehaviour
         
         computeShader.SetVector("_TerrainPosition", terrainPosition);
         computeShader.SetVector("_TerrainSize", terrainSize);
-        computeShader.SetTexture(0, "_HeightMap", heightMap);
+        
+        computeShader.SetTexture(kernel, "_HeightMap", heightMap);
         //computeShader.SetTexture(0, "_AlphaMap", alphaMap);
-        computeShader.SetTexture(0, "_NormalMap", normalMap);
+        computeShader.SetTexture(kernel, "_NormalMap", normalMap);
+        
         computeShader.SetVector("_Scale", scale);
+        computeShader.SetVector("_ScaleVariationRange", scaleVariationRange);
         
         int groups = Mathf.CeilToInt(resolution / 8f);
-        computeShader.Dispatch(0, groups, groups, 1);
+        computeShader.Dispatch(kernel, groups, groups, 1);
 
         uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
         // Arguments for drawing mesh.

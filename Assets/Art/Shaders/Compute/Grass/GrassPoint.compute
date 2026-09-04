@@ -1,6 +1,6 @@
 #pragma kernel InitializeGrass
 
-#include "Assets/Art/Shaders/SimplexNoise3D.hlsl"
+#include "Assets/Art/Shaders/SimplexNoise2D.hlsl"
 #include "UnityCG.cginc"
 #include "Assets/Art/Shaders/Random.cginc"
 #define kMaxHeight (32766.0f/65535.0f) //needed for height map check TerrainTools docs
@@ -9,7 +9,7 @@ struct GrassData
 {
     float4 position;
     float3 up;
-    float yawAngle;
+    float3 forward;
     float2 scale;
 };
 
@@ -18,7 +18,9 @@ RWStructuredBuffer<GrassData> _GrassDataBuffer;
 
 float3 _TerrainPosition;
 float3 _TerrainSize;
+
 float2 _Scale;
+float2 _ScaleVariationRange;
 
 Texture2D<float4> _HeightMap;
 SamplerState _HeightMapPointClampSampler;
@@ -38,10 +40,13 @@ void InitializeGrass(uint3 id : SV_DispatchThreadID)
     
     float2 uv = float2(id.xy) / (float(_Resolution) - 1); //uv space
     
-    float jitterX = randValue(index) - 0.5f;
-    float jitterY = randValue(index + 1) - 0.5f;
+    float jitterX = randValue(index) * 2.0 - 1.0; //remap to -1 to 1
+    float jitterY = randValue(index + 67) * 2.0 - 1.0;
     float2 jitter = float2(jitterX, jitterY);
     uv += jitter / _Resolution;
+    
+    float noise = SimplexNoise(uv * 2);
+    uv += float2(noise, noise) / _Resolution;
     
     float3 position = _TerrainPosition;
     position.xz += uv * _TerrainSize.xz;
@@ -49,16 +54,22 @@ void InitializeGrass(uint3 id : SV_DispatchThreadID)
     float4 heightMapValue = _HeightMap.SampleLevel(_HeightMapPointClampSampler, uv, 0);
     float unpackHeight = UnpackHeightmap(heightMapValue); //needed check TerrainTools docs
     float height = unpackHeight * (_TerrainSize.y / kMaxHeight);
+    
     position.y += height;
     
     grass.position = float4(position, 1.0);
     
-    grass.yawAngle = randValue(index) * 180.0;
+    float angle = randValue(index) * 180.0;
+    float3 forward = float3(cos(angle), 0, sin(angle));
+    grass.forward = normalize(forward);
     
-    grass.scale = 1.0 + (randValue(index) - 0.5) * _Scale;
+    float scaleVariation = lerp(_ScaleVariationRange.x, _ScaleVariationRange.y, randValue(index));
+    scaleVariation = max(scaleVariation, 0);
+    grass.scale = _Scale * scaleVariation;
     
     float4 normalMapValue = _NormalMap.SampleLevel(_NormalMapPointClampSampler, uv, 0);
-    grass.up.xyz = normalMapValue.xyz;
+    float3 normal = normalize(normalMapValue.rgb * 2.0 - 1.0);
+    grass.up = normal;
 
     _GrassDataBuffer[index] = grass;
     

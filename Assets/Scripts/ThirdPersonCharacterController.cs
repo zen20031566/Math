@@ -60,11 +60,14 @@ public class ThirdPersonCharacterController : MonoBehaviour
         Movement movementRootState = new Movement(stateMachine, null, this);
         stateMachine.Init(movementRootState);
     }
-
+    private Vector3 startPosition;
     private void Start()
     {
         cinemachineTargetYaw = CinemachineCameraTarget.transform.eulerAngles.y;
         AssignAnimationIDs();
+        
+        startPosition = transform.position;
+
     }
 
     private void OnMoveInput(InputAction.CallbackContext ctx)
@@ -91,40 +94,57 @@ public class ThirdPersonCharacterController : MonoBehaviour
         {
             PlayAnimation("Dash", false);
         }
-    }
+        
+        
+        float t = Mathf.Sin(Time.time) * 0.5f + 0.5f;
+    
+        Vector3 endPosition = new Vector3(
+            startPosition.x + 20f,
+            startPosition.y,
+            startPosition.z
+        );
+    
+        Vector3 move = Vector3.Lerp(
+            startPosition,
+            endPosition,
+            t
+        );
 
+        characterController.Move(move);
+    }
+    
     public bool raww;
     public bool sloope;
     public bool rescaale;
-    private void OnAnimatorMove()
-    {
-        //if (!IsMovementPressed) return;
-
-        Vector3 raw = animator.deltaPosition; // cache ONCE
-        Vector3 slope = SlopeCorrection(raw);
-        Vector3 rescale = slope.normalized * raw.magnitude;
-
-        //Vector3 velocity = animator.deltaPosition;
-
-        Vector3 postGravRaw = raw;
-        postGravRaw.y += verticalVelocity * Time.deltaTime; //apply gravity and vertical velocites like jump etc
-
-        Vector3 postGravSlope = slope;
-        postGravSlope.y += verticalVelocity * Time.deltaTime; //apply gravity and vertical velocites like jump etc
-
-        Vector3 postGravRescale = rescale;
-        postGravRescale.y += verticalVelocity * Time.deltaTime; //apply gravity and vertical velocites like jump etc
-
-        if (raww) characterController.Move(postGravRaw);
-        else if (sloope) characterController.Move(postGravSlope);
-                else if (rescaale) characterController.Move(postGravRescale);
-        
-
-        //Debug.Log($"raw={raw.magnitude:F4} | slope={slope.magnitude:F4} | rescaled={rescale.magnitude:F4} | " +
-            //$"postGravRaw={postGravRaw.magnitude:F4} | postGravSlope={postGravSlope.magnitude:F4} | postGravRescale={postGravRescale.magnitude:F4}");
-
-
-    }
+    // private void OnAnimatorMove()
+    // {
+    //     //if (!IsMovementPressed) return;
+    //
+    //     Vector3 raw = animator.deltaPosition; // cache ONCE
+    //     Vector3 slope = SlopeCorrection(raw);
+    //     Vector3 rescale = slope.normalized * raw.magnitude;
+    //
+    //     //Vector3 velocity = animator.deltaPosition;
+    //
+    //     Vector3 postGravRaw = raw;
+    //     postGravRaw.y += verticalVelocity * Time.deltaTime; //apply gravity and vertical velocites like jump etc
+    //
+    //     Vector3 postGravSlope = slope;
+    //     postGravSlope.y += verticalVelocity * Time.deltaTime; //apply gravity and vertical velocites like jump etc
+    //
+    //     Vector3 postGravRescale = rescale;
+    //     postGravRescale.y += verticalVelocity * Time.deltaTime; //apply gravity and vertical velocites like jump etc
+    //
+    //     if (raww) characterController.Move(postGravRaw);
+    //     else if (sloope) characterController.Move(postGravSlope);
+    //             else if (rescaale) characterController.Move(postGravRescale);
+    //     
+    //
+    //     //Debug.Log($"raw={raw.magnitude:F4} | slope={slope.magnitude:F4} | rescaled={rescale.magnitude:F4} | " +
+    //         //$"postGravRaw={postGravRaw.magnitude:F4} | postGravSlope={postGravSlope.magnitude:F4} | postGravRescale={postGravRescale.magnitude:F4}");
+    //
+    //
+    // }
 
     private void LateUpdate()
     {
@@ -294,5 +314,7 @@ public class ThirdPersonCharacterController : MonoBehaviour
 
         Debug.DrawLine(spherePos, spherePos + Vector3.down * GroundCheckDistance, Color.cyan);
     }
+    
+
 
 }
