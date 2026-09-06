@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: 0.72156864, g: 0.8392157, b: 0.91764706, a: 0}
   m_FogMode: 3
-  m_FogDensity: 0.006
+  m_FogDensity: 0.007
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.4509804, g: 0.7019608, b: 0.972549, a: 1}
@@ -1006,7 +1006,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.92, y: 1.29, z: 1.5599997}
+  m_LocalPosition: {x: 0.459, y: 2.4090002, z: 2.1680002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1848,7 +1848,7 @@ MonoBehaviour:
   cloudDome: {fileID: 477481449}
   cloudRotationSpeed: 1
   timeOfDay: 13.4
-  secondsPerGameHour: 1
+  secondsPerGameHour: 600
   dayLightColor: {r: 1, g: 0.95778704, b: 0.8443396, a: 1}
   nightLightColor: {r: 0, g: 0, b: 0.5450981, a: 1}
   fogDayColor: {r: 0.72156864, g: 0.8392157, b: 0.91764706, a: 0}
@@ -2320,12 +2320,12 @@ Terrain:
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
   m_DrawHeightmap: 1
-  m_DrawInstanced: 0
+  m_DrawInstanced: 1
   m_DrawTreesAndFoliage: 1
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
+  m_MaterialTemplate: {fileID: 2100000, guid: 7f29bb3329492894e89062c2e8574dd9, type: 2}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -2347,7 +2347,59 @@ Transform:
   m_GameObject: {fileID: 911285259}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -300, y: 0, z: -300}
+  m_LocalPosition: {x: -50, y: 0, z: -50}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &911461916
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 911461918}
+  - component: {fileID: 911461917}
+  m_Layer: 0
+  m_Name: GrassGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &911461917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911461916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4963287ec49629842b777e938d57dc42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrassGenerator
+  computeShader: {fileID: 7200000, guid: 4f0ed952ffab98a42906586cc5dacdb5, type: 3}
+  resolution: 500
+  material: {fileID: 2100000, guid: 2506e31e1e8215f419a2d3ae4dfbda72, type: 2}
+  mesh: {fileID: 9091874763089778162, guid: f2f9d3b5d7bb11a4ea9e9d748e797ac7, type: 3}
+  scale: {x: 1, y: 1.45}
+  scaleVariationRange: {x: 0.5, y: 1}
+  alphaMapIndex: 0
+  updateGrass: 0
+--- !u!4 &911461918
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911461916}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2707,9 +2759,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f47773ff3cb4db2409f157410f5cdeb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GPUGraph
-  resolution: 10
+  resolution: 50
   function: 0
-  computeShader: {fileID: 7200000, guid: d78ca15c01d741e4cbeecb719c01a677, type: 3}
+  computeShader: {fileID: 7200000, guid: 4045fc21c918da54cb26c73bf6648816, type: 3}
   functionDuration: 1
   material: {fileID: 2100000, guid: bac79ed68ca47f8458f7d624056f24b4, type: 2}
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
@@ -4979,7 +5031,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1951764235
 Transform:
   m_ObjectHideFlags: 0
@@ -6674,7 +6726,7 @@ Transform:
   m_GameObject: {fileID: 919132147709243313}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.92, y: 0, z: 4.22}
+  m_LocalPosition: {x: 0.459, y: 1.119, z: 4.828}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7139,7 +7191,7 @@ MonoBehaviour:
   RunSpeed: 10
   FallMoveSpeed: 2
   RotationSmoothTime: 0.08
-  Gravity: -15
+  Gravity: -5
   IsGrounded: 1
   GroundedOffset: -0.28
   GroundedRadius: 0.22
@@ -7169,7 +7221,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 9f9fa01d23309c74a8dbd78020ef1a93, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -11447,7 +11499,7 @@ Transform:
   m_GameObject: {fileID: 2782176518706947950}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.56, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16712,3 +16764,4 @@ SceneRoots:
   - {fileID: 911285262}
   - {fileID: 527053870}
   - {fileID: 1951764235}
+  - {fileID: 911461918}
