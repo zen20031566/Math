@@ -14,7 +14,7 @@ public class GrassGenerator : MonoBehaviour
     private ComputeBuffer grassDataBuffer;
     private ComputeBuffer argsBuffer;
 
-    private int kernel;
+    private int initGrassKernel;
     
     [SerializeField] private int alphaMapIndex;
     
@@ -23,12 +23,44 @@ public class GrassGenerator : MonoBehaviour
     
     Bounds bounds;  
     
+    //Cull grass
+    [SerializeField] private ComputeShader cullComputeShader;
+    private ComputeBuffer voteBuffer;
+    private int voteKernel;
+    
+    private int numThreadGroups;
+    private int numVoteThreadGroups;
+    private int numGroupScanThreadGroups;
+    
     void OnEnable()
     {
-        kernel = computeShader.FindKernel("InitializeGrass");
+        initGrassKernel = computeShader.FindKernel("InitializeGrass");
         terrain =  Terrain.activeTerrain;
         grassDataBuffer = new ComputeBuffer(resolution * resolution, sizeof(float) * 12); //number of floats: position(float4) uv(float2) displacement(float) 4 + 2 + 1 = 7
         argsBuffer = new ComputeBuffer(1, sizeof(uint) * 5, ComputeBufferType.IndirectArguments);
+        
+        voteKernel = computeShader.FindKernel("Vote");
+        voteBuffer = new ComputeBuffer(resolution * resolution, sizeof(uint));
+        
+        
+        numThreadGroups = Mathf.CeilToInt(resolution * resolution/ 128.0f);
+        //we want power 2 numbers because the group scan algo needs it? i dont really understand but yes
+        if (numThreadGroups > 128) 
+        {
+            int powerOfTwo = 128;
+            while (powerOfTwo < numThreadGroups)
+                powerOfTwo *= 2;
+            
+            numThreadGroups = powerOfTwo;
+        } 
+        else 
+        {
+            while (128 % numThreadGroups != 0)
+                numThreadGroups++;
+        }
+        
+        numVoteThreadGroups = Mathf.CeilToInt(resolution * resolution / 128.0f);
+        numGroupScanThreadGroups = Mathf.CeilToInt(resolution * resolution / 1024.0f);
         
         UpdateGrassBuffer();
     }
@@ -37,8 +69,16 @@ public class GrassGenerator : MonoBehaviour
     {
         grassDataBuffer.Release();
         grassDataBuffer = null;
+        
+        voteBuffer.Release();
+        voteBuffer = null;
     }
 
+    void CullGrass()
+    {
+        
+    }
+    
     void UpdateGrassBuffer()
     {
         if (grassDataBuffer == null || grassDataBuffer.count != resolution * resolution)
@@ -48,7 +88,7 @@ public class GrassGenerator : MonoBehaviour
         }
 
         computeShader.SetInt("_Resolution", resolution);
-        computeShader.SetBuffer(kernel, "_GrassDataBuffer", grassDataBuffer);
+        computeShader.SetBuffer(initGrassKernel, "_GrassDataBuffer", grassDataBuffer);
         
         Vector3 terrainPosition = terrain.transform.position;
         Vector3 terrainSize = terrain.terrainData.size; 
@@ -59,15 +99,15 @@ public class GrassGenerator : MonoBehaviour
         computeShader.SetVector("_TerrainPosition", terrainPosition);
         computeShader.SetVector("_TerrainSize", terrainSize);
         
-        computeShader.SetTexture(kernel, "_HeightMap", heightMap);
+        computeShader.SetTexture(initGrassKernel, "_HeightMap", heightMap);
         //computeShader.SetTexture(0, "_AlphaMap", alphaMap);
-        computeShader.SetTexture(kernel, "_NormalMap", normalMap);
+        computeShader.SetTexture(initGrassKernel, "_NormalMap", normalMap);
         
         computeShader.SetVector("_Scale", scale);
         computeShader.SetVector("_ScaleVariationRange", scaleVariationRange);
         
-        int groups = Mathf.CeilToInt(resolution / 8f);
-        computeShader.Dispatch(kernel, groups, groups, 1);
+        int threadGroups = Mathf.CeilToInt(resolution / 8f);
+        computeShader.Dispatch(initGrassKernel, threadGroups, threadGroups , 1);
 
         uint[] args = new uint[5] { 0, 0, 0, 0, 0 };
         // Arguments for drawing mesh.
