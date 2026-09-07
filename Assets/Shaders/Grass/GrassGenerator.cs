@@ -29,11 +29,6 @@ public class GrassGenerator : MonoBehaviour
     
     private Bounds bounds;  
     private uint[] args;
-
-    public class GrassChunk
-    {
-        
-    }
     
     void OnEnable()
     {
