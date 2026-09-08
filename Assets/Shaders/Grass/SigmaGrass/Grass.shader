@@ -172,7 +172,9 @@ Shader "Basics/Grass"
                 grassGradient *= lerp(0.88, 1, colorNoise);
                 float3 finalColor = (ambient + diffuse) * grassGradient + highLights;
       
-                return float4(finalColor, 1);
+                //return float4(finalColor, 1);
+                
+                return _TopColor;
             }
             ENDHLSL
         }
