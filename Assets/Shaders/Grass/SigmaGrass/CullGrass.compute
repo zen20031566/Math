@@ -2,7 +2,7 @@
 #pragma kernel Scan
 #pragma kernel ScanGroupSums
 #pragma kernel Compact
-#pragma kernel ResetArgs
+// #pragma kernel ResetArgs
 
 
 struct GrassData 
@@ -51,9 +51,9 @@ void Vote(uint3 id : SV_DispatchThreadID)
     NDC.z = clipspace.w; //if w is position point is in front of camera if negative or near zero its behind or at camera
 
     bool inView = NDC.x < -0.2f || NDC.x > 1.2f || NDC.z <= -0.1f ? 0 : 1;
-    bool withinDistance = distance(_CameraPosition, position.xyz) < _MaxDrawDistance;
+    //bool withinDistance = distance(_CameraPosition, position.xyz) < _MaxDrawDistance;
 
-    _VoteBuffer[id.x] = inView * withinDistance;
+    _VoteBuffer[id.x] = inView;
 }
 
 //Each group will have 64 threads and each thread handles 2 vote elements

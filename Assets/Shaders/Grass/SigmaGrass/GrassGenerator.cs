@@ -4,14 +4,14 @@ using UnityEngine.Serialization;
 using static System.Runtime.InteropServices.Marshal;
 using System.Collections.Generic;
 
-public enum SigmaGrassTerrainSize
+public enum GrassTerrainSize
 {
     Low = 128,
     Mid = 256,
     High = 512,
 }
 
-public struct SigmaGrassData 
+public struct GrassData 
 {
     public Vector4 Position;
     public Vector3 Up;
@@ -19,7 +19,7 @@ public struct SigmaGrassData
     public Vector2 Scale;
 };
 
-public struct SigmaGrassChunkData
+public struct GrassChunkData
 {
     public int Resolution;
     public Terrain Terrain;
@@ -31,16 +31,19 @@ public struct SigmaGrassChunkData
     public int InitGrassKernel;
 }
 
-public class SigmaGrassGenerator : MonoBehaviour
+public enum ChunkState { Culled, FullRes, LOD }
+
+public class GrassGenerator : MonoBehaviour
 {
     [SerializeField] private List<SigmaGrassModel> models = new List<SigmaGrassModel>();
     
-    [SerializeField] private SigmaGrassTerrainSize mapSize = SigmaGrassTerrainSize.Low;
+    [SerializeField] private GrassTerrainSize mapSize = GrassTerrainSize.Low;
     private int resolution;
     
     [Range(0, 100.0f)] public float maxDrawDistance = 100.0f;
     [Range(0, 100.0f)] public float lodCutoff = 100.0f;
     private float sqrLodCutoff;
+    private float[] distanceBands;
     
     [SerializeField] ComputeShader initGrassShader;
     [SerializeField] ComputeShader cullGrassShader;
@@ -64,12 +67,17 @@ public class SigmaGrassGenerator : MonoBehaviour
     private int numGroupScanThreadGroups; 
     
     [SerializeField] int numChunkPerEdge = 4;
-    private int totalNumChunks;
     private int chunkSize;
-    private List<SigmaGrassChunk> chunks;
+    private GrassChunk[] chunks; 
     private int numThreadsPerChunk;
 
     private Camera camera;
+    private CullingGroup cullingGroup;
+
+    private ChunkState[] chunkStates;
+    private bool[] chunkBufferAllocateRequests;
+    private bool[] chunkBufferClearRequests;
+    
     
     void OnEnable()
     {
@@ -102,7 +110,14 @@ public class SigmaGrassGenerator : MonoBehaviour
     private void UpdateData()
     {
         camera = Camera.main;
+        
         sqrLodCutoff = lodCutoff * lodCutoff;
+        if (lodCutoff >= maxDrawDistance)
+        {
+            lodCutoff = maxDrawDistance - 1f;
+        }
+        distanceBands = new float[] { lodCutoff, maxDrawDistance };
+        
         terrain =  Terrain.activeTerrain;
         resolution = (int)mapSize;
         terrain.terrainData.size = Vector3.one * resolution;
@@ -117,7 +132,6 @@ public class SigmaGrassGenerator : MonoBehaviour
         
         chunkSize = resolution / numChunkPerEdge;
         numThreadsPerChunk = chunkSize * chunkSize;
-        totalNumChunks = numChunkPerEdge * numChunkPerEdge;
         
         voteBuffer = new ComputeBuffer(numThreadsPerChunk, sizeof(uint));
         scanBuffer = new ComputeBuffer(numThreadsPerChunk, sizeof(uint));
@@ -164,11 +178,14 @@ public class SigmaGrassGenerator : MonoBehaviour
                 chunk.ClearBuffers();
             chunks = null;
         }
+        
+        cullingGroup?.Dispose();
+        cullingGroup = null;
     }
     
     void InitChunks()
     {
-        SigmaGrassChunkData chunkData = new SigmaGrassChunkData();
+        GrassChunkData chunkData = new GrassChunkData();
         chunkData.Resolution = resolution;
         chunkData.Terrain = terrain;
         chunkData.NumChunkPerEdge = numChunkPerEdge;
@@ -177,24 +194,60 @@ public class SigmaGrassGenerator : MonoBehaviour
         chunkData.InitGrassShader = initGrassShader;
         chunkData.CullGrassShader = cullGrassShader;
         chunkData.InitGrassKernel = initGrassKernel;
-            
-        chunks = new List<SigmaGrassChunk>();
 
+        int totalChunks = models.Count * numChunkPerEdge * numChunkPerEdge;
+        chunks = new GrassChunk[totalChunks];
+        var chunkBoundingSpheres = new BoundingSphere[totalChunks]; //bounding sphere index needs to match chunk index exactly
+        chunkStates = new ChunkState[totalChunks];
+        chunkBufferAllocateRequests = new bool[totalChunks];
+        chunkBufferClearRequests = new bool[totalChunks];
+
+        int index = 0;
         foreach (var model in models)
         {
             for (int x = 0; x < numChunkPerEdge; ++x) 
             {
                 for (int y = 0; y < numChunkPerEdge; ++y) 
                 {
-                    var chunk = new SigmaGrassChunk();
+                    var chunk = new GrassChunk();
                     chunk.Init(model, chunkData, x, y);
-                    chunks.Add(chunk);
+                    chunks[index] = chunk;
+                    chunkBoundingSpheres[index] = new BoundingSphere(chunk.Bounds.center, chunk.Bounds.extents.magnitude);
+                    index++;
                 }
             }
         }
+        
+        cullingGroup = new CullingGroup();
+        cullingGroup.targetCamera = camera;
+        cullingGroup.SetBoundingSpheres(chunkBoundingSpheres);
+        cullingGroup.SetDistanceReferencePoint(camera.transform);
+        cullingGroup.SetBoundingDistances(distanceBands);
+        cullingGroup.onStateChanged = OnCullingStateChange;
     }
-    
-    void CullGrass(Matrix4x4 VP, SigmaGrassChunk chunk, bool noLOD)
+
+    private void OnCullingStateChange(CullingGroupEvent e)
+    {
+        ChunkState state;
+        if (!e.isVisible || e.currentDistance >= 2)
+        {
+            state = ChunkState.Culled;
+        }
+        else if (e.currentDistance == 1) //at lod threshold
+        {
+            state = ChunkState.LOD;
+        }
+        else
+        {
+            state = ChunkState.FullRes;
+        }
+
+        chunkBufferAllocateRequests[e.index] = state != ChunkState.Culled && !chunks[e.index].HasBuffers;
+        chunkBufferClearRequests[e.index] = state == ChunkState.Culled && chunks[e.index].HasBuffers && e.currentDistance >= 2;
+        chunkStates[e.index] = state;
+    }
+
+    void CullGrass(Matrix4x4 VP, GrassChunk chunk, bool noLOD)
     {
         if (noLOD)
             chunk.ArgsBuffer.SetData(chunk.Args);
@@ -239,23 +292,35 @@ public class SigmaGrassGenerator : MonoBehaviour
         Matrix4x4 V = camera.worldToCameraMatrix;
         Matrix4x4 VP = P * V;
         
-        foreach (var chunk in chunks)
-        {
-            // float dist = Vector3.Distance(camera.transform.position, chunk.Bounds.center);
-            // bool noLOD = dist < lodCutoff;
+        for (int i = 0; i < chunks.Length; i++)
+        { 
+            GrassChunk chunk = chunks[i];
             
-            float sqrDist = chunk.Bounds.SqrDistance(camera.transform.position);
-            sqrLodCutoff = lodCutoff * lodCutoff;
-            bool noLOD = sqrDist < sqrLodCutoff;
+            //Allocate buffer
+            if (chunkBufferAllocateRequests[i])
+            {
+                chunk.AllocateBuffers();
+                chunkBufferAllocateRequests[i] = false;
+            }
             
-            CullGrass(VP, chunk, noLOD);
+            //Clear buffer
+            if (chunkBufferClearRequests[i])
+            {
+                chunk.ClearBuffers();
+                chunkBufferClearRequests[i] = false;
+            }
             
-            if (noLOD)
-                Graphics.DrawMeshInstancedIndirect(chunk.Mesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBuffer);
-            else
-                Graphics.DrawMeshInstancedIndirect(chunk.LODMesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBufferLOD);
+            //Draw
+            if (chunkStates[i] != ChunkState.Culled)
+            {
+                bool noLOD = chunkStates[i] != ChunkState.LOD;
+                CullGrass(VP, chunk, noLOD);
+                
+                if (noLOD)
+                    Graphics.DrawMeshInstancedIndirect(chunk.Mesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBuffer);
+                else
+                    Graphics.DrawMeshInstancedIndirect(chunk.LODMesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBufferLOD);
+            }
         }
-       
     }
-    
 }

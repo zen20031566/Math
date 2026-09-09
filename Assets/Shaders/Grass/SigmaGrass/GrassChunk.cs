@@ -1,7 +1,8 @@
 using UnityEngine;
 using static System.Runtime.InteropServices.Marshal;
-public class SigmaGrassChunk 
+public class GrassChunk 
 {
+    public SigmaGrassModel Model { get; private set; }
     public Mesh Mesh { get; private set; }
     public Mesh LODMesh { get; private set; }
     public Material Material { get; private set; }
@@ -31,8 +32,9 @@ public class SigmaGrassChunk
     private ComputeShader cullGrassShader;
     private int initGrassKernel;
     
-    public void Init(SigmaGrassModel model, SigmaGrassChunkData chunkData, int chunkX, int chunkY)
+    public void Init(SigmaGrassModel model, GrassChunkData chunkData, int chunkX, int chunkY)
     {
+        Model = model;
         Mesh = model.Mesh;
         LODMesh = model.LODMesh;
         Material = new Material(model.Material);
@@ -58,6 +60,15 @@ public class SigmaGrassChunk
         center.z = (chunkY + 0.5f) * (terrainSize.z / numChunkPerEdge);
         center.y = terrainSize.y * 0.5f;
         center = terrainPosition + center;
+        
+        Vector3 size = new Vector3
+        (
+            terrainSize.x / numChunkPerEdge,
+            terrainSize.y,
+            terrainSize.z / numChunkPerEdge
+        );
+        
+        Bounds = new Bounds(center, size);
         
         Args = new uint[5] { 0, 0, 0, 0, 0 };
         Args[0] = (uint)Mesh.GetIndexCount(0); //number of triangle indices
@@ -95,8 +106,8 @@ public class SigmaGrassChunk
         ArgsBuffer.SetData(Args);
         ArgsBufferLOD.SetData(ArgsLOD);
         
-        GrassDataBuffer = new ComputeBuffer(numThreadsPerChunk, SizeOf(typeof(SigmaGrassData)));
-        CulledGrassBuffer = new ComputeBuffer(numThreadsPerChunk, SizeOf(typeof(SigmaGrassData)));
+        GrassDataBuffer = new ComputeBuffer(numThreadsPerChunk, SizeOf(typeof(GrassData)));
+        CulledGrassBuffer = new ComputeBuffer(numThreadsPerChunk, SizeOf(typeof(GrassData)));
         
         initGrassShader.SetInt("_Resolution", resolution);
         initGrassShader.SetInt("_ChunkSize", chunkSize);
@@ -117,6 +128,8 @@ public class SigmaGrassChunk
         initGrassShader.Dispatch(initGrassKernel, groups, groups, 1);
         
         Material.SetBuffer("_GrassDataBuffer", CulledGrassBuffer);
+        
+        UnityEngine.Debug.Log($"Model {Model.name} Chunk ({ChunkX}, {ChunkY}) has been allocated");
     }
     
     public void ClearBuffers() 
@@ -130,5 +143,7 @@ public class SigmaGrassChunk
         CulledGrassBuffer = null;
         ArgsBuffer = null;
         ArgsBufferLOD = null;
+        
+        UnityEngine.Debug.Log($"Model {Model.name} Chunk ({ChunkX}, {ChunkY}) has been cleared");
     }
 }
