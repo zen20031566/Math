@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cc126e56002d79418a1f72aa2c31c7c, type: 3}
   m_Name: Grass
   m_EditorClassIdentifier: Assembly-CSharp::SigmaGrassModel
-  Mesh: {fileID: -462981019419857548, guid: 7576b579c79001842b01456a3deb9f4a, type: 3}
+  Mesh: {fileID: 3284317394355905387, guid: 1f68db82e5f2a234eb63c80c8b305d9e, type: 3}
   Material: {fileID: 2100000, guid: 2506e31e1e8215f419a2d3ae4dfbda72, type: 2}
-  LODMesh: {fileID: 6271093427156374420, guid: 233fcb69c76ef6b47a292f4ba174d57b, type: 3}
+  LODMesh: {fileID: -462981019419857548, guid: 1e6bc1bcaa09ccf4cb09de1a523da359, type: 3}
   Scale: {x: 1, y: 1}
   ScaleVariationRange: {x: 0.6, y: 1}

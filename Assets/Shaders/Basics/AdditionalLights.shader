@@ -165,9 +165,7 @@ Shader "Basics/AdditionalLighting"
 
             ENDHLSL
         }
-
-        // ShadowCaster pass added in Part 6.
-
+        
         Pass
         {
             Tags
@@ -235,8 +233,6 @@ Shader "Basics/AdditionalLighting"
 
             ENDHLSL
         }
-
-        // DepthOnly and DepthNormals passes added in Part 4.
 
         Pass
         {

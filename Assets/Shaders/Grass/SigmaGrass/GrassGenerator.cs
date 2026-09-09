@@ -29,19 +29,23 @@ public struct GrassChunkData
     public ComputeShader InitGrassShader;
     public ComputeShader CullGrassShader;
     public int InitGrassKernel;
+    public Texture2D[] DetailMaps;
+    public int DetailMapIndex;
+    public Vector4 DetailSplatMapChannels;
 }
 
 public enum ChunkState { Culled, FullRes, LOD }
 
+[RequireComponent(typeof(GrassPaintController))]
 public class GrassGenerator : MonoBehaviour
 {
-    [SerializeField] private List<SigmaGrassModel> models = new List<SigmaGrassModel>();
+    [SerializeField] private SigmaGrassModel[] models = new SigmaGrassModel[8];
     
     [SerializeField] private GrassTerrainSize mapSize = GrassTerrainSize.Low;
     private int resolution;
     
-    [Range(0, 100.0f)] public float maxDrawDistance = 100.0f;
-    [Range(0, 100.0f)] public float lodCutoff = 100.0f;
+    [Range(0, 100.0f)] public float maxDrawDistance = 48.0f;
+    [Range(0, 100.0f)] public float lodCutoff = 5.0f;
     private float sqrLodCutoff;
     private float[] distanceBands;
     
@@ -78,6 +82,8 @@ public class GrassGenerator : MonoBehaviour
     private bool[] chunkBufferAllocateRequests;
     private bool[] chunkBufferClearRequests;
     
+    private GrassPaintController grassPaintController;
+    private Texture2D[] detailMaps;
     
     void OnEnable()
     {
@@ -109,7 +115,13 @@ public class GrassGenerator : MonoBehaviour
     
     private void UpdateData()
     {
+        terrain = GetComponent<Terrain>();
+        if (terrain == null) Debug.LogError("Place this script on terrain!");
+        
         camera = Camera.main;
+        
+        grassPaintController = GetComponent<GrassPaintController>();
+        detailMaps = grassPaintController.SourceTextures;
         
         sqrLodCutoff = lodCutoff * lodCutoff;
         if (lodCutoff >= maxDrawDistance)
@@ -118,7 +130,6 @@ public class GrassGenerator : MonoBehaviour
         }
         distanceBands = new float[] { lodCutoff, maxDrawDistance };
         
-        terrain =  Terrain.activeTerrain;
         resolution = (int)mapSize;
         terrain.terrainData.size = Vector3.one * resolution;
             
@@ -183,6 +194,19 @@ public class GrassGenerator : MonoBehaviour
         cullingGroup = null;
     }
     
+    public Vector4 GetDetailSplatMapChannels(int ID)
+    {
+        ID = ID % 4;
+            
+        var rChannel = ID == 0 ? 1f : 0f;
+        var gChannel = ID == 1 ? 1f : 0f;
+        var bChannel = ID == 2 ? 1f : 0f;
+        var aChannel = ID == 3 ? 1f : 0f;
+
+        var splatChannels = new Vector4(rChannel, gChannel, bChannel, aChannel);
+        return splatChannels;
+    }
+    
     void InitChunks()
     {
         GrassChunkData chunkData = new GrassChunkData();
@@ -195,25 +219,27 @@ public class GrassGenerator : MonoBehaviour
         chunkData.CullGrassShader = cullGrassShader;
         chunkData.InitGrassKernel = initGrassKernel;
 
-        int totalChunks = models.Count * numChunkPerEdge * numChunkPerEdge;
+        int totalChunks = models.Length * numChunkPerEdge * numChunkPerEdge;
         chunks = new GrassChunk[totalChunks];
         var chunkBoundingSpheres = new BoundingSphere[totalChunks]; //bounding sphere index needs to match chunk index exactly
         chunkStates = new ChunkState[totalChunks];
         chunkBufferAllocateRequests = new bool[totalChunks];
         chunkBufferClearRequests = new bool[totalChunks];
-
-        int index = 0;
-        foreach (var model in models)
+        
+        for (int i = 0; i < models.Length; i++)
         {
+            var model = models[i];
+            chunkData.DetailMapIndex = (i > 3) ? 1 : 0;
+            chunkData.DetailSplatMapChannels = GetDetailSplatMapChannels(i);
+            
             for (int x = 0; x < numChunkPerEdge; ++x) 
             {
                 for (int y = 0; y < numChunkPerEdge; ++y) 
                 {
                     var chunk = new GrassChunk();
                     chunk.Init(model, chunkData, x, y);
-                    chunks[index] = chunk;
-                    chunkBoundingSpheres[index] = new BoundingSphere(chunk.Bounds.center, chunk.Bounds.extents.magnitude);
-                    index++;
+                    chunks[i] = chunk;
+                    chunkBoundingSpheres[i] = new BoundingSphere(chunk.Bounds.center, chunk.Bounds.extents.magnitude);
                 }
             }
         }

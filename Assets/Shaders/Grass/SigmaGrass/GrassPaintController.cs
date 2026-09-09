@@ -14,8 +14,8 @@ public class GrassPaintController : MonoBehaviour
     private const string SPLAT_MAP_PREFIX = "SigmaGrass_Detail_Splat_Map";
     private const int MAX_SPLAT_MAP_COUNT = 2;
     [SerializeField] private Texture2D[] sourceTextures;
-    [SerializeField] private RenderTexture[] renderTextures; 
-    
+    [SerializeField] private RenderTexture[] renderTextures;
+
     public Texture2D[] SourceTextures => sourceTextures;
     public RenderTexture[] RenderTextures => renderTextures;
     public int CurrentSplatMapIndex { get; private set; } = 0;
@@ -28,7 +28,8 @@ public class GrassPaintController : MonoBehaviour
         terrain = GetComponent<Terrain>();
         
         #if UNITY_EDITOR
-        CreateSourceTextures();
+        CreateSourceTextures(); 
+        InitRenderTextures();
         #endif
     }
 
@@ -108,14 +109,6 @@ public class GrassPaintController : MonoBehaviour
         {
             sourceTextures[i] = textures[i] as Texture2D;
         }
-    }
-    
-    public bool IsTextureArrayNeedUpdate(int splatMapIndex)
-    {
-        return RenderTextures == null || sourceTextures == null ||
-               RenderTextures.Length == 0 || sourceTextures.Length == 0 ||
-               sourceTextures[splatMapIndex] == null ||
-               splatMapIndex != CurrentSplatMapIndex;
     }
     
     private void OnValidate()

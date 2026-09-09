@@ -16,6 +16,12 @@ public class GrassPaintTool : TerrainPaintTool<GrassPaintTool>
     private SerializedObject m_layersObject;
     private int m_currentSelectIndex = -1;
 
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        m_buttonInitialized  = false;
+    }
+    
     // Name of the Terrain Tool. This appears in the tool UI.
     public override string GetName()
     {
@@ -160,11 +166,6 @@ public class GrassPaintTool : TerrainPaintTool<GrassPaintTool>
 
         if (paintCtrl != null && m_currentSelectIndex >= 0)
         {
-            if (paintCtrl.IsTextureArrayNeedUpdate(splatMapIndex))
-            {
-                paintCtrl.InitRenderTextures();
-            }
-
             //apply brush result to runtime RT start
             var src = RenderTexture.GetTemporary(512, 512, 16, RenderTextureFormat.ARGB32,
                 RenderTextureReadWrite.Linear);

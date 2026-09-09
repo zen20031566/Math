@@ -31,6 +31,9 @@ public class GrassChunk
     private ComputeShader initGrassShader;
     private ComputeShader cullGrassShader;
     private int initGrassKernel;
+    private Texture2D[] detailMaps;
+    private int detailMapIndex;
+    private Vector4 detailSplatMapChannels;
     
     public void Init(SigmaGrassModel model, GrassChunkData chunkData, int chunkX, int chunkY)
     {
@@ -49,6 +52,9 @@ public class GrassChunk
         initGrassShader = chunkData.InitGrassShader;
         cullGrassShader = chunkData.CullGrassShader;
         initGrassKernel = chunkData.InitGrassKernel;
+        detailMaps = chunkData.DetailMaps;
+        detailMapIndex = chunkData.DetailMapIndex;
+        detailSplatMapChannels = chunkData.DetailSplatMapChannels;
         ChunkX = chunkX;
         ChunkY = chunkY;
         

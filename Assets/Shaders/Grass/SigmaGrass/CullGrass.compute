@@ -4,7 +4,6 @@
 #pragma kernel Compact
 // #pragma kernel ResetArgs
 
-
 struct GrassData 
 {
     float4 position;
@@ -30,6 +29,9 @@ groupshared uint temp[2 * 64];
 groupshared uint grouptemp[2 * 1024]; 
 int _ScanNumOfGroups;
 
+Texture2D<float4> _DetailMap;
+SamplerState _DetailMapPointClampSampler;
+float3 _DetailSplatMapChannels;
 
 [numthreads(128, 1, 1)]
 void Vote(uint3 id : SV_DispatchThreadID)
