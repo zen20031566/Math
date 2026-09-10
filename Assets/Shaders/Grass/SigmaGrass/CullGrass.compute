@@ -10,6 +10,8 @@ struct GrassData
     float3 up;
     float3 forward;
     float2 scale;
+    float2 terrainUV;
+    float densityThreshold;
 };
 
 RWStructuredBuffer<GrassData> _GrassDataBuffer;
@@ -31,7 +33,7 @@ int _ScanNumOfGroups;
 
 Texture2D<float4> _DetailMap;
 SamplerState _DetailMapPointClampSampler;
-float3 _DetailSplatMapChannels;
+float4 _DetailSplatMapChannels;
 
 [numthreads(128, 1, 1)]
 void Vote(uint3 id : SV_DispatchThreadID)
@@ -54,7 +56,9 @@ void Vote(uint3 id : SV_DispatchThreadID)
 
     bool inView = NDC.x < -0.2f || NDC.x > 1.2f || NDC.z <= -0.1f ? 0 : 1;
     //bool withinDistance = distance(_CameraPosition, position.xyz) < _MaxDrawDistance;
-
+    
+    //Detail map, only draw if density reaches the threshold of the detail map
+    
     _VoteBuffer[id.x] = inView;
 }
 

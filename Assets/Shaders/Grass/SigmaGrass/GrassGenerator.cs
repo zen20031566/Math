@@ -17,6 +17,8 @@ public struct GrassData
     public Vector3 Up;
     public Vector3 Forward;
     public Vector2 Scale;
+    public Vector2 TerrainUV; 
+    public float DensityThreshold;
 };
 
 public struct GrassChunkData
@@ -29,9 +31,10 @@ public struct GrassChunkData
     public ComputeShader InitGrassShader;
     public ComputeShader CullGrassShader;
     public int InitGrassKernel;
-    public Texture2D[] DetailMaps;
-    public int DetailMapIndex;
+    public Texture2D DetailMap;
     public Vector4 DetailSplatMapChannels;
+    public int GrassDensity;
+    public int ChunkIndex;
 }
 
 public enum ChunkState { Culled, FullRes, LOD }
@@ -39,13 +42,15 @@ public enum ChunkState { Culled, FullRes, LOD }
 [RequireComponent(typeof(GrassPaintController))]
 public class GrassGenerator : MonoBehaviour
 {
-    [SerializeField] private SigmaGrassModel[] models = new SigmaGrassModel[8];
+    [SerializeField] private List<SigmaGrassModel> models = new List<SigmaGrassModel>();
     
     [SerializeField] private GrassTerrainSize mapSize = GrassTerrainSize.Low;
     private int resolution;
+
+    [SerializeField, Range(0, 256)] private int grassDensity = 10;
     
-    [Range(0, 100.0f)] public float maxDrawDistance = 48.0f;
-    [Range(0, 100.0f)] public float lodCutoff = 5.0f;
+    [SerializeField, Range(0, 100.0f)] public float maxDrawDistance = 48.0f;
+    [SerializeField, Range(0, 100.0f)] public float lodCutoff = 5.0f;
     private float sqrLodCutoff;
     private float[] distanceBands;
     
@@ -64,13 +69,12 @@ public class GrassGenerator : MonoBehaviour
     private ComputeBuffer scanBuffer;
     private ComputeBuffer groupSumArrayBuffer;
     private ComputeBuffer scannedGroupSumBuffer;
-
-    private int numGrassInitThreadGroups;
+    
     private int numThreadGroups; //scan and compact uses numThreadGroups
     private int numVoteThreadGroups;
     private int numGroupScanThreadGroups; 
     
-    [SerializeField] int numChunkPerEdge = 4;
+    private int numChunkPerEdge = 4;
     private int chunkSize;
     private GrassChunk[] chunks; 
     private int numThreadsPerChunk;
@@ -130,6 +134,8 @@ public class GrassGenerator : MonoBehaviour
         }
         distanceBands = new float[] { lodCutoff, maxDrawDistance };
         
+        // numChunkPerEdge = (int)mapSize / 32;
+        numChunkPerEdge = 4;
         resolution = (int)mapSize;
         terrain.terrainData.size = Vector3.one * resolution;
             
@@ -218,19 +224,22 @@ public class GrassGenerator : MonoBehaviour
         chunkData.InitGrassShader = initGrassShader;
         chunkData.CullGrassShader = cullGrassShader;
         chunkData.InitGrassKernel = initGrassKernel;
-
-        int totalChunks = models.Length * numChunkPerEdge * numChunkPerEdge;
+        
+        int totalChunks = models.Count * numChunkPerEdge * numChunkPerEdge;
         chunks = new GrassChunk[totalChunks];
         var chunkBoundingSpheres = new BoundingSphere[totalChunks]; //bounding sphere index needs to match chunk index exactly
         chunkStates = new ChunkState[totalChunks];
         chunkBufferAllocateRequests = new bool[totalChunks];
         chunkBufferClearRequests = new bool[totalChunks];
         
-        for (int i = 0; i < models.Length; i++)
+        int chunkIndex = 0;
+        for (int i = 0; i < models.Count; i++)
         {
             var model = models[i];
-            chunkData.DetailMapIndex = (i > 3) ? 1 : 0;
+            int detailMapIndex = (i > 3) ? 1 : 0;
+            chunkData.DetailMap = detailMaps[detailMapIndex];
             chunkData.DetailSplatMapChannels = GetDetailSplatMapChannels(i);
+            chunkData.ChunkIndex = chunkIndex;
             
             for (int x = 0; x < numChunkPerEdge; ++x) 
             {
@@ -238,8 +247,9 @@ public class GrassGenerator : MonoBehaviour
                 {
                     var chunk = new GrassChunk();
                     chunk.Init(model, chunkData, x, y);
-                    chunks[i] = chunk;
-                    chunkBoundingSpheres[i] = new BoundingSphere(chunk.Bounds.center, chunk.Bounds.extents.magnitude);
+                    chunks[chunkIndex] = chunk;
+                    chunkBoundingSpheres[chunkIndex] = new BoundingSphere(chunk.Bounds.center, chunk.Bounds.extents.magnitude);
+                    chunkIndex++;
                 }
             }
         }
@@ -284,8 +294,10 @@ public class GrassGenerator : MonoBehaviour
         cullGrassShader.SetMatrix("MATRIX_VP", VP);
         cullGrassShader.SetBuffer(voteKernel, "_GrassDataBuffer", chunk.GrassDataBuffer);
         cullGrassShader.SetBuffer(voteKernel, "_VoteBuffer", voteBuffer);
-        cullGrassShader.SetVector("_CameraPosition", Camera.main.transform.position);
+        cullGrassShader.SetVector("_CameraPosition", camera.transform.position);
         cullGrassShader.SetFloat("_MaxDrawDistance", maxDrawDistance);
+        cullGrassShader.SetTexture(voteKernel, "_DetailMap", chunk.DetailMap);
+        cullGrassShader.SetVector("_DetailSplatMapChannels", chunk.DetailSplatMapChannels);
         cullGrassShader.Dispatch(voteKernel, numVoteThreadGroups, 1, 1);
         
         //Scan Instances

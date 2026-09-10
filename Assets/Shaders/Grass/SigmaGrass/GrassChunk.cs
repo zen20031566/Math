@@ -19,6 +19,9 @@ public class GrassChunk
     public int ChunkX { get; private set; }
     public int ChunkY { get; private set; }
 
+    public Texture2D DetailMap { get; private set; }
+    public Vector4 DetailSplatMapChannels { get; private set; }
+    
     public bool HasBuffers => GrassDataBuffer != null && GrassDataBuffer.IsValid();
     
     private Vector2 scale;
@@ -31,9 +34,8 @@ public class GrassChunk
     private ComputeShader initGrassShader;
     private ComputeShader cullGrassShader;
     private int initGrassKernel;
-    private Texture2D[] detailMaps;
-    private int detailMapIndex;
-    private Vector4 detailSplatMapChannels;
+    private int grassDensity;
+    private int chunkIndex;
     
     public void Init(SigmaGrassModel model, GrassChunkData chunkData, int chunkX, int chunkY)
     {
@@ -52,11 +54,12 @@ public class GrassChunk
         initGrassShader = chunkData.InitGrassShader;
         cullGrassShader = chunkData.CullGrassShader;
         initGrassKernel = chunkData.InitGrassKernel;
-        detailMaps = chunkData.DetailMaps;
-        detailMapIndex = chunkData.DetailMapIndex;
-        detailSplatMapChannels = chunkData.DetailSplatMapChannels;
+        DetailMap = chunkData.DetailMap;
+        DetailSplatMapChannels = chunkData.DetailSplatMapChannels;
         ChunkX = chunkX;
         ChunkY = chunkY;
+        grassDensity = chunkData.GrassDensity;
+        chunkIndex = chunkData.ChunkIndex;
         
         Vector3 terrainPosition = terrain.transform.position;
         Vector3 terrainSize = terrain.terrainData.size; 
@@ -104,7 +107,6 @@ public class GrassChunk
         Vector3 terrainPosition = terrain.transform.position;
         Vector3 terrainSize = terrain.terrainData.size; 
         Texture heightMap = terrain.terrainData.heightmapTexture;
-        // Texture2D alphaMap = terrain.terrainData.GetAlphamapTexture(alphaMapIndex);
         Texture normalMap = terrain.normalmapTexture;  
         
         ArgsBuffer = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
@@ -124,11 +126,13 @@ public class GrassChunk
         initGrassShader.SetVector("_TerrainSize", terrainSize);
         
         initGrassShader.SetTexture(initGrassKernel, "_HeightMap", heightMap);
-        //computeShader.SetTexture(0, "_AlphaMap", alphaMap);
         initGrassShader.SetTexture(initGrassKernel, "_NormalMap", normalMap);
         
         initGrassShader.SetVector("_Scale", scale);
         initGrassShader.SetVector("_ScaleVariationRange", scaleVariationRange);
+        
+        initGrassShader.SetInt("_GrassDensity", grassDensity);
+        initGrassShader.SetInt("_ChunkIndex", chunkIndex);
         
         int groups = Mathf.CeilToInt(chunkSize / 8f);
         initGrassShader.Dispatch(initGrassKernel, groups, groups, 1);

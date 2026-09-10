@@ -1410,6 +1410,43 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!84 &441616298
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 512
+  m_Height: 512
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 4
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 1
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
+  m_ShadowSamplingMode: 2
 --- !u!1001 &477481448
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2211,43 +2248,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1757025990}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!84 &793260223
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 512
-  m_Height: 512
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 4
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 1
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 0
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -2419,9 +2419,9 @@ GameObject:
   m_Component:
   - component: {fileID: 911285262}
   - component: {fileID: 911285261}
-  - component: {fileID: 911285260}
   - component: {fileID: 911285264}
   - component: {fileID: 911285263}
+  - component: {fileID: 911285260}
   m_Layer: 6
   m_Name: Terrain
   m_TagString: Untagged
@@ -2513,17 +2513,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 911285259}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e87c1b4f574b1647aee2311c3edc00b, type: 3}
+  m_Script: {fileID: 11500000, guid: 3ce1e7e124070314892b66201cf6c3dc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GrassGenerator
-  models:
-  - {fileID: 11400000, guid: 8f4b83da9f7ff2c499de30912951b92b, type: 2}
-  mapSize: 128
-  grassDensity: 10
-  maxDrawDistance: 48
-  lodCutoff: 5
-  initGrassShader: {fileID: 7200000, guid: 94c8ae39a99be0a498083cee30fcde5d, type: 3}
-  cullGrassShader: {fileID: 7200000, guid: 221bfbd3b4ce2704a9f9280c210e40c3, type: 3}
+  m_EditorClassIdentifier: Assembly-CSharp::GrassPaintController
+  sourceTextures:
+  - {fileID: -6614213656212293392, guid: 2e389b6c83fa20f4b921b9c9e3254aa6, type: 2}
+  - {fileID: -5130499613448396298, guid: 2e389b6c83fa20f4b921b9c9e3254aa6, type: 2}
+  renderTextures:
+  - {fileID: 1199166565}
+  - {fileID: 441616298}
 --- !u!114 &911285264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2533,15 +2531,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 911285259}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ce1e7e124070314892b66201cf6c3dc, type: 3}
+  m_Script: {fileID: 11500000, guid: 4963287ec49629842b777e938d57dc42, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GrassPaintController
-  sourceTextures:
-  - {fileID: -6614213656212293392, guid: 2e389b6c83fa20f4b921b9c9e3254aa6, type: 2}
-  - {fileID: -5130499613448396298, guid: 2e389b6c83fa20f4b921b9c9e3254aa6, type: 2}
-  renderTextures:
-  - {fileID: 2050972578}
-  - {fileID: 793260223}
+  m_EditorClassIdentifier: Assembly-CSharp::GrassGenerator
+  models:
+  - {fileID: 11400000, guid: 8f4b83da9f7ff2c499de30912951b92b, type: 2}
+  mapSize: 128
+  grassDensity: 2
+  maxDrawDistance: 48
+  lodCutoff: 5
+  initGrassShader: {fileID: 7200000, guid: 94c8ae39a99be0a498083cee30fcde5d, type: 3}
+  cullGrassShader: {fileID: 7200000, guid: 221bfbd3b4ce2704a9f9280c210e40c3, type: 3}
 --- !u!1 &961685547
 GameObject:
   m_ObjectHideFlags: 0
@@ -3141,6 +3141,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 527053870}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!84 &1199166565
+RenderTexture:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 6
+  m_Width: 512
+  m_Height: 512
+  m_AntiAliasing: 1
+  m_MipCount: -1
+  m_DepthStencilFormat: 0
+  m_ColorFormat: 4
+  m_MipMap: 0
+  m_GenerateMips: 1
+  m_SRGB: 1
+  m_UseDynamicScale: 0
+  m_UseDynamicScaleExplicit: 0
+  m_BindMS: 0
+  m_EnableCompatibleFormat: 1
+  m_EnableRandomWrite: 0
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_Dimension: 2
+  m_VolumeDepth: 1
+  m_ShadowSamplingMode: 2
 --- !u!1 &1203545817
 GameObject:
   m_ObjectHideFlags: 0
@@ -5574,43 +5611,6 @@ Transform:
   - {fileID: 101454357}
   m_Father: {fileID: 527053870}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!84 &2050972578
-RenderTexture:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_ImageContentsHash:
-    serializedVersion: 2
-    Hash: 00000000000000000000000000000000
-  m_IsAlphaChannelOptional: 0
-  serializedVersion: 6
-  m_Width: 512
-  m_Height: 512
-  m_AntiAliasing: 1
-  m_MipCount: -1
-  m_DepthStencilFormat: 0
-  m_ColorFormat: 4
-  m_MipMap: 0
-  m_GenerateMips: 1
-  m_SRGB: 1
-  m_UseDynamicScale: 0
-  m_UseDynamicScaleExplicit: 0
-  m_BindMS: 0
-  m_EnableCompatibleFormat: 1
-  m_EnableRandomWrite: 0
-  m_TextureSettings:
-    serializedVersion: 2
-    m_FilterMode: 1
-    m_Aniso: 1
-    m_MipBias: 0
-    m_WrapU: 1
-    m_WrapV: 1
-    m_WrapW: 1
-  m_Dimension: 2
-  m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
 --- !u!1 &2058007553
 GameObject:
   m_ObjectHideFlags: 0

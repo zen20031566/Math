@@ -11,11 +11,15 @@ struct GrassData
     float3 up;
     float3 forward;
     float2 scale;
+    float2 terrainUV;
+    float densityThreshold;
 };
 
 uint _Resolution;
 uint _ChunkSize;
 float2 _ChunkID;
+uint _ChunkIndex;
+
 RWStructuredBuffer<GrassData> _GrassDataBuffer;
 
 float3 _TerrainPosition;
@@ -30,29 +34,42 @@ SamplerState _HeightMapPointClampSampler;
 Texture2D<float4> _NormalMap;
 SamplerState _NormalMapPointClampSampler;
 
+//int _GrassDensity;
+
 [numthreads(8,8,1)]
 void InitGrass(uint3 id : SV_DispatchThreadID) 
 {
     //this gets index
     //check if less than resolution to prevent out of bounds
     if (id.x >= _ChunkSize || id.y >= _ChunkSize) return;
-    uint index = id.x + id.y * _ChunkSize;
+    uint threadIndex = id.x + id.y * _ChunkSize;
     
     GrassData grass = (GrassData)0;
     
+    //Terrain UV
     float2 uv = float2(id.x + _ChunkID.x * _ChunkSize, id.y + _ChunkID.y * _ChunkSize);
     uv /= _Resolution - 1; 
+    grass.terrainUV = uv;
     
+    //PosXZ
     float3 position = _TerrainPosition;
     position.xz += uv * _TerrainSize.xz;
     
+    //Height
     float4 heightMapValue = _HeightMap.SampleLevel(_HeightMapPointClampSampler, uv, 0);
     float unpackHeight = UnpackHeightmap(heightMapValue); //needed check TerrainTools docs
     float height = unpackHeight * (_TerrainSize.y / kMaxHeight);
     
     position.y += height;
-    
     grass.position = float4(position, 1.0);
+    
+    //Normals
+    float4 normalMapValue = _NormalMap.SampleLevel(_NormalMapPointClampSampler, uv, 0);
+    float3 normal = normalize(normalMapValue.rgb * 2.0 - 1.0);
+    grass.up = normal;
+    
+    // //Density
+    // grass.densityThreshold = (threadIndex + 1) / _GrassDensity;
 
-    _GrassDataBuffer[index] = grass;
+    _GrassDataBuffer[threadIndex] = grass;
 }
