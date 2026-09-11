@@ -20,7 +20,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
-  m_LockedProperties: _Roughness2 _WindScale
+  m_LockedProperties: _Roughness2
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -69,7 +69,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WindTexture:
-        m_Texture: {fileID: 2800000, guid: 9e1fd2f58f185dd41bcf81f89f4191ca, type: 3}
+        m_Texture: {fileID: 2800000, guid: 9f2a885222e78414ea86bb96efe57223, type: 3}
         m_Scale: {x: 0.5, y: 0.5}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -128,9 +128,9 @@ Material:
     - _SwayPitch: 8.3
     - _SwayYaw: -45.9
     - _TipHighlightPower: 5.27
-    - _WindScale: 0.3
-    - _WindSpeed: 1
-    - _WindStrength: 0.21
+    - _WindScale: 1
+    - _WindSpeed: 0.07
+    - _WindStrength: 0.44
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
@@ -143,7 +143,7 @@ Material:
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _TipHighlightColor: {r: 0.92015, g: 0.9528302, b: 0.80451226, a: 1}
     - _TopColor: {r: 0.28285307, g: 0.42352942, b: 0.13333336, a: 1}
-    - _WindDirection: {r: 1, g: 1, b: 0, a: 1}
+    - _WindDirection: {r: 1, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &638995459504775359

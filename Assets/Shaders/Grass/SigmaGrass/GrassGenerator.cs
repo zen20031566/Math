@@ -92,6 +92,21 @@ public class GrassGenerator : MonoBehaviour
     private GrassPaintController grassPaintController;
     private Texture2D[] detailMaps;
     
+    private static readonly int MatrixVPID = Shader.PropertyToID("MATRIX_VP");
+    private static readonly int GrassDataBufferID = Shader.PropertyToID("_GrassDataBuffer");
+    private static readonly int VoteBufferID = Shader.PropertyToID("_VoteBuffer");
+    private static readonly int CameraPositionID = Shader.PropertyToID("_CameraPosition");
+    private static readonly int MaxDrawDistanceID = Shader.PropertyToID("_MaxDrawDistance");
+    private static readonly int DetailMapID = Shader.PropertyToID("_DetailMap");
+    private static readonly int DetailSplatMapChannelsID = Shader.PropertyToID("_DetailSplatMapChannels");
+    private static readonly int ScanBufferID = Shader.PropertyToID("_ScanBuffer");
+    private static readonly int ScanGroupSumArrayID = Shader.PropertyToID("_ScanGroupSumArray");
+    private static readonly int ScanNumOfGroupsID = Shader.PropertyToID("_ScanNumOfGroups");
+    private static readonly int ScanGroupSumArrayInID = Shader.PropertyToID("_ScanGroupSumArrayIn");
+    private static readonly int ScanGroupSumArrayOutID = Shader.PropertyToID("_ScanGroupSumArrayOut");
+    private static readonly int ArgsBufferID = Shader.PropertyToID("_ArgsBuffer");
+    private static readonly int CulledGrassOutputBufferID = Shader.PropertyToID("_CulledGrassOutputBuffer");
+    
     void OnEnable()
     {
         UpdateData();
@@ -298,6 +313,27 @@ public class GrassGenerator : MonoBehaviour
         chunkStates[e.index] = state;
     }
 
+
+    void InitCull(Matrix4x4 VP)
+    {
+        cullGrassShader.SetMatrix(MatrixVPID, VP);
+        cullGrassShader.SetVector(CameraPositionID, camera.transform.position);
+        cullGrassShader.SetFloat(MaxDrawDistanceID, maxDrawDistance);
+        cullGrassShader.SetBuffer(voteKernel, VoteBufferID, voteBuffer);
+        
+        cullGrassShader.SetBuffer(scanKernel, VoteBufferID, voteBuffer);
+        cullGrassShader.SetBuffer(scanKernel, ScanBufferID, scanBuffer);
+        cullGrassShader.SetBuffer(scanKernel, ScanGroupSumArrayID, groupSumArrayBuffer);
+        
+        cullGrassShader.SetInt(ScanNumOfGroupsID, numThreadGroups);
+        cullGrassShader.SetBuffer(scanGroupSumKernel, ScanGroupSumArrayInID, groupSumArrayBuffer);
+        cullGrassShader.SetBuffer(scanGroupSumKernel, ScanGroupSumArrayOutID, scannedGroupSumBuffer);
+        
+        cullGrassShader.SetBuffer(compactKernel, VoteBufferID, voteBuffer);
+        cullGrassShader.SetBuffer(compactKernel, ScanBufferID, scanBuffer);
+        cullGrassShader.SetBuffer(compactKernel, ScanGroupSumArrayID, scannedGroupSumBuffer);
+    }
+    
     void CullGrass(Matrix4x4 VP, GrassChunk chunk, bool noLOD)
     {
         if (noLOD)
@@ -306,34 +342,21 @@ public class GrassGenerator : MonoBehaviour
             chunk.ArgsBufferLOD.SetData(chunk.ArgsLOD);
         
         //Vote
-        cullGrassShader.SetMatrix("MATRIX_VP", VP);
-        cullGrassShader.SetBuffer(voteKernel, "_GrassDataBuffer", chunk.GrassDataBuffer);
-        cullGrassShader.SetBuffer(voteKernel, "_VoteBuffer", voteBuffer);
-        cullGrassShader.SetVector("_CameraPosition", camera.transform.position);
-        cullGrassShader.SetFloat("_MaxDrawDistance", maxDrawDistance);
-        cullGrassShader.SetTexture(voteKernel, "_DetailMap", chunk.DetailMap);
-        cullGrassShader.SetVector("_DetailSplatMapChannels", chunk.DetailSplatMapChannels);
+        cullGrassShader.SetBuffer(voteKernel, GrassDataBufferID, chunk.GrassDataBuffer);
+        cullGrassShader.SetTexture(voteKernel, DetailMapID, chunk.DetailMap);
+        cullGrassShader.SetVector(DetailSplatMapChannelsID, chunk.DetailSplatMapChannels);
         cullGrassShader.Dispatch(voteKernel, numVoteThreadGroups, 1, 1);
         
         //Scan Instances
-        cullGrassShader.SetBuffer(scanKernel, "_VoteBuffer", voteBuffer);
-        cullGrassShader.SetBuffer(scanKernel, "_ScanBuffer", scanBuffer);
-        cullGrassShader.SetBuffer(scanKernel, "_ScanGroupSumArray", groupSumArrayBuffer);
         cullGrassShader.Dispatch(scanKernel, numThreadGroups, 1, 1);
     
         //Scan Groups
-        cullGrassShader.SetInt("_ScanNumOfGroups", numThreadGroups);
-        cullGrassShader.SetBuffer(scanGroupSumKernel, "_ScanGroupSumArrayIn", groupSumArrayBuffer);
-        cullGrassShader.SetBuffer(scanGroupSumKernel, "_ScanGroupSumArrayOut", scannedGroupSumBuffer);
         cullGrassShader.Dispatch(scanGroupSumKernel, 1, 1, 1);
     
         //Compact
-        cullGrassShader.SetBuffer(compactKernel, "_GrassDataBuffer", chunk.GrassDataBuffer);
-        cullGrassShader.SetBuffer(compactKernel, "_VoteBuffer", voteBuffer);
-        cullGrassShader.SetBuffer(compactKernel, "_ScanBuffer", scanBuffer);
-        cullGrassShader.SetBuffer(compactKernel, "_ArgsBuffer", noLOD ? chunk.ArgsBuffer : chunk.ArgsBufferLOD);
-        cullGrassShader.SetBuffer(compactKernel, "_CulledGrassOutputBuffer", chunk.CulledGrassBuffer);
-        cullGrassShader.SetBuffer(compactKernel, "_ScanGroupSumArray", scannedGroupSumBuffer);
+        cullGrassShader.SetBuffer(compactKernel, GrassDataBufferID, chunk.GrassDataBuffer);
+        cullGrassShader.SetBuffer(compactKernel, ArgsBufferID, noLOD ? chunk.ArgsBuffer : chunk.ArgsBufferLOD);
+        cullGrassShader.SetBuffer(compactKernel, CulledGrassOutputBufferID, chunk.CulledGrassBuffer);
         cullGrassShader.Dispatch(compactKernel, numThreadGroups, 1, 1);
     }
     
@@ -344,11 +367,11 @@ public class GrassGenerator : MonoBehaviour
         Matrix4x4 P = camera.projectionMatrix;
         Matrix4x4 V = camera.worldToCameraMatrix;
         Matrix4x4 VP = P * V;
+        InitCull(VP);
         
         for (int i = 0; i < chunks.Length; i++)
         { 
             GrassChunk chunk = chunks[i];
-            
             
             //Allocate buffer
             if (chunkBufferAllocateRequests[i])
@@ -371,9 +394,9 @@ public class GrassGenerator : MonoBehaviour
                 CullGrass(VP, chunk, noLOD);
                 
                 if (noLOD)
-                    Graphics.DrawMeshInstancedIndirect(chunk.Mesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBuffer);
+                    Graphics.DrawMeshInstancedIndirect(chunk.Mesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBuffer, 0, chunk.PropertyBlock);
                 else
-                    Graphics.DrawMeshInstancedIndirect(chunk.LODMesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBufferLOD);
+                    Graphics.DrawMeshInstancedIndirect(chunk.LODMesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBufferLOD, 0, chunk.PropertyBlock);
             }
         }
     }

@@ -6,6 +6,7 @@ public class GrassChunk
     public Mesh Mesh { get; private set; }
     public Mesh LODMesh { get; private set; }
     public Material Material { get; private set; }
+    public MaterialPropertyBlock PropertyBlock { get; private set; }
     
     public ComputeBuffer GrassDataBuffer { get; private set; }
     public ComputeBuffer CulledGrassBuffer { get; private set; }
@@ -44,7 +45,8 @@ public class GrassChunk
         Model = model;
         Mesh = model.Mesh;
         LODMesh = model.LODMesh;
-        Material = new Material(model.Material);
+        Material = model.Material;
+        PropertyBlock = new MaterialPropertyBlock();
         scale = model.Scale;
         scaleVariationRange = model.ScaleVariationRange;
 
@@ -143,7 +145,7 @@ public class GrassChunk
         int groups = Mathf.CeilToInt(chunkResolution / 8f);
         initGrassShader.Dispatch(initGrassKernel, groups, groups, 1);
         
-        Material.SetBuffer("_GrassDataBuffer", CulledGrassBuffer);
+        PropertyBlock.SetBuffer("_GrassDataBuffer", CulledGrassBuffer);
         
         UnityEngine.Debug.Log($"Model {Model.name} Chunk ({ChunkX}, {ChunkY}) has been allocated");
     }

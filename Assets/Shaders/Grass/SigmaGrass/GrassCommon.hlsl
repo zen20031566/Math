@@ -71,15 +71,17 @@ float3 GetGrassPosition(float3 positionOS,float2 uv, uint instanceID)
     // float originalY = localPosition.y; 
     // localPosition.y = sqrt(max(originalY * originalY - xzOffsetLen * xzOffsetLen, 0.0));
     
-    float2 windDir = normalize(_WindDirection);
-    float2 windUV = grass.position.xz + _Time.y * _WindSpeed * windDir * _WindScale;
-    float2 wind = SimplexNoise(windUV) * _WindStrength * uv.y;
-    
     //localPosition.xz += wind;
     float3 positionWS = grass.position.xyz + localPosition.xyz; //final 
     
     
-    //positionWS.xz += wind;
+    float2 windDir = normalize(_WindDirection);
+    float2 windUV = positionWS.xz + _Time.y * _WindSpeed * windDir * _WindScale;
+    windUV = TRANSFORM_TEX(windUV, _WindTexture);
+    // float2 wind = SimplexNoise(windUV) * _WindStrength * uv.y;
+    float4 windTex = SAMPLE_TEXTURE2D_LOD(_WindTexture, sampler_WindTexture, windUV, 0);
+    float2 wind = (windTex.rg * 2 - 1) * _WindStrength * uv.y;
+    positionWS.xz += wind;
     
     return positionWS;
 }
