@@ -24,12 +24,14 @@ public class GrassChunk
     
     public bool HasBuffers => GrassDataBuffer != null && GrassDataBuffer.IsValid();
     
+    private int mapSize;
     private Vector2 scale;
     private Vector2 scaleVariationRange;
     private int resolution;
     private Terrain terrain;
     private int numChunkPerEdge;
     private int chunkSize;
+    private int chunkResolution;
     private int numThreadsPerChunk;
     private ComputeShader initGrassShader;
     private ComputeShader cullGrassShader;
@@ -46,10 +48,12 @@ public class GrassChunk
         scale = model.Scale;
         scaleVariationRange = model.ScaleVariationRange;
 
+        mapSize = chunkData.MapSize;
         resolution = chunkData.Resolution;
         terrain = chunkData.Terrain;
         numChunkPerEdge = chunkData.NumChunkPerEdge;
         chunkSize = chunkData.ChunkSize;
+        chunkResolution = chunkData.ChunkResolution;
         numThreadsPerChunk = chunkData.NumThreadsPerChunk;
         initGrassShader = chunkData.InitGrassShader;
         cullGrassShader = chunkData.CullGrassShader;
@@ -97,7 +101,7 @@ public class GrassChunk
             UnityEngine.Random.Range(0f, 1f)
         );
         
-        Material.SetColor("_TopColor", randomColor);
+        //Material.SetColor("_TopColor", randomColor);
     }
 
     public void AllocateBuffers()
@@ -117,8 +121,10 @@ public class GrassChunk
         GrassDataBuffer = new ComputeBuffer(numThreadsPerChunk, SizeOf(typeof(GrassData)));
         CulledGrassBuffer = new ComputeBuffer(numThreadsPerChunk, SizeOf(typeof(GrassData)));
         
+        initGrassShader.SetInt("_MapSize", mapSize);
         initGrassShader.SetInt("_Resolution", resolution);
         initGrassShader.SetInt("_ChunkSize", chunkSize);
+        initGrassShader.SetInt("_ChunkResolution", chunkResolution);
         initGrassShader.SetVector("_ChunkID", new Vector4(ChunkX, ChunkY, 0,0)); 
         initGrassShader.SetBuffer(initGrassKernel, "_GrassDataBuffer", GrassDataBuffer);
         
@@ -134,7 +140,7 @@ public class GrassChunk
         initGrassShader.SetInt("_GrassDensity", grassDensity);
         initGrassShader.SetInt("_ChunkIndex", chunkIndex);
         
-        int groups = Mathf.CeilToInt(chunkSize / 8f);
+        int groups = Mathf.CeilToInt(chunkResolution / 8f);
         initGrassShader.Dispatch(initGrassKernel, groups, groups, 1);
         
         Material.SetBuffer("_GrassDataBuffer", CulledGrassBuffer);

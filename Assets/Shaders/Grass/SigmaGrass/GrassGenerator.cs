@@ -23,10 +23,12 @@ public struct GrassData
 
 public struct GrassChunkData
 {
+    public int MapSize;
     public int Resolution;
     public Terrain Terrain;
     public int NumChunkPerEdge;
     public int ChunkSize;
+    public int ChunkResolution;
     public int NumThreadsPerChunk;
     public ComputeShader InitGrassShader;
     public ComputeShader CullGrassShader;
@@ -47,7 +49,7 @@ public class GrassGenerator : MonoBehaviour
     [SerializeField] private GrassTerrainSize mapSize = GrassTerrainSize.Low;
     private int resolution;
 
-    [SerializeField, Range(0, 256)] private int grassDensity = 10;
+    [SerializeField, Range(1, 15)] private int grassDensity = 10;
     
     [SerializeField, Range(0, 100.0f)] public float maxDrawDistance = 48.0f;
     [SerializeField, Range(0, 100.0f)] public float lodCutoff = 5.0f;
@@ -76,6 +78,7 @@ public class GrassGenerator : MonoBehaviour
     
     private int numChunkPerEdge = 4;
     private int chunkSize;
+    private int chunkResolution;
     private GrassChunk[] chunks; 
     private int numThreadsPerChunk;
 
@@ -92,37 +95,46 @@ public class GrassGenerator : MonoBehaviour
     void OnEnable()
     {
         UpdateData();
+        
+        #if UNITY_EDITOR
         TerrainCallbacks.heightmapChanged += OnHeightmapChanged;
         TerrainCallbacks.textureChanged   += OnTextureChanged;
+        UnityEditor.EditorApplication.focusChanged += OnEditorFocusChanged;
+        #endif
     }
     
     void OnDisable()
     {
         ClearData();
+        
+        #if UNITY_EDITOR
         TerrainCallbacks.heightmapChanged -= OnHeightmapChanged;
         TerrainCallbacks.textureChanged   -= OnTextureChanged;
+        UnityEditor.EditorApplication.focusChanged -= OnEditorFocusChanged;
+        #endif
     }
-
-    void OnHeightmapChanged(Terrain t, RectInt region, bool synched)
-    {
-        if (t != terrain) return;
-        ClearData();
-        UpdateData();
-    }
-
-    void OnTextureChanged(Terrain t, string name, RectInt region, bool synched)
-    {
-        if (t != terrain) return;
-        ClearData();
-        UpdateData();
-    }
+    
+    #if UNITY_EDITOR
+    private void OnEditorFocusChanged(bool hasFocus) => UpdateData();
+    void OnHeightmapChanged(Terrain t, RectInt region, bool synched) => UpdateData();
+    void OnTextureChanged(Terrain t, string name, RectInt region, bool synched) => UpdateData();
+    #endif
     
     private void UpdateData()
     {
+        ClearData();
+        
         terrain = GetComponent<Terrain>();
         if (terrain == null) Debug.LogError("Place this script on terrain!");
         
-        camera = Camera.main;
+        #if UNITY_EDITOR
+        if (!Application.isPlaying && UnityEditor.SceneView.lastActiveSceneView != null)
+            camera = UnityEditor.SceneView.lastActiveSceneView.camera;
+        else
+        {
+        #endif
+            camera = Camera.main;
+        }
         
         grassPaintController = GetComponent<GrassPaintController>();
         detailMaps = grassPaintController.SourceTextures;
@@ -134,11 +146,13 @@ public class GrassGenerator : MonoBehaviour
         }
         distanceBands = new float[] { lodCutoff, maxDrawDistance };
         
-        // numChunkPerEdge = (int)mapSize / 32;
-        numChunkPerEdge = 4;
-        resolution = (int)mapSize;
-        terrain.terrainData.size = Vector3.one * resolution;
-            
+        numChunkPerEdge = (int)mapSize / 32;
+        terrain.terrainData.size = Vector3.one * (int)mapSize;
+        chunkSize = (int)mapSize / numChunkPerEdge;
+        resolution = (int)mapSize * grassDensity;
+        chunkResolution = resolution / numChunkPerEdge;
+        numThreadsPerChunk = chunkResolution * chunkResolution;
+        
         if (initGrassShader == null || cullGrassShader == null) Debug.LogError("Compute shaders not set");
         
         initGrassKernel = initGrassShader.FindKernel("InitGrass");
@@ -146,9 +160,6 @@ public class GrassGenerator : MonoBehaviour
         scanKernel = cullGrassShader.FindKernel("Scan");
         scanGroupSumKernel = cullGrassShader.FindKernel("ScanGroupSums");
         compactKernel = cullGrassShader.FindKernel("Compact"); 
-        
-        chunkSize = resolution / numChunkPerEdge;
-        numThreadsPerChunk = chunkSize * chunkSize;
         
         voteBuffer = new ComputeBuffer(numThreadsPerChunk, sizeof(uint));
         scanBuffer = new ComputeBuffer(numThreadsPerChunk, sizeof(uint));
@@ -216,14 +227,17 @@ public class GrassGenerator : MonoBehaviour
     void InitChunks()
     {
         GrassChunkData chunkData = new GrassChunkData();
+        chunkData.MapSize = (int)mapSize;
         chunkData.Resolution = resolution;
         chunkData.Terrain = terrain;
         chunkData.NumChunkPerEdge = numChunkPerEdge;
         chunkData.ChunkSize = chunkSize;
+        chunkData.ChunkResolution = chunkResolution;
         chunkData.NumThreadsPerChunk = numThreadsPerChunk;
         chunkData.InitGrassShader = initGrassShader;
         chunkData.CullGrassShader = cullGrassShader;
         chunkData.InitGrassKernel = initGrassKernel;
+        chunkData.GrassDensity = grassDensity;
         
         int totalChunks = models.Count * numChunkPerEdge * numChunkPerEdge;
         chunks = new GrassChunk[totalChunks];
@@ -239,13 +253,13 @@ public class GrassGenerator : MonoBehaviour
             int detailMapIndex = (i > 3) ? 1 : 0;
             chunkData.DetailMap = detailMaps[detailMapIndex];
             chunkData.DetailSplatMapChannels = GetDetailSplatMapChannels(i);
-            chunkData.ChunkIndex = chunkIndex;
             
             for (int x = 0; x < numChunkPerEdge; ++x) 
             {
                 for (int y = 0; y < numChunkPerEdge; ++y) 
                 {
                     var chunk = new GrassChunk();
+                    chunkData.ChunkIndex = chunkIndex;
                     chunk.Init(model, chunkData, x, y);
                     chunks[chunkIndex] = chunk;
                     chunkBoundingSpheres[chunkIndex] = new BoundingSphere(chunk.Bounds.center, chunk.Bounds.extents.magnitude);
@@ -277,9 +291,10 @@ public class GrassGenerator : MonoBehaviour
         {
             state = ChunkState.FullRes;
         }
-
-        chunkBufferAllocateRequests[e.index] = state != ChunkState.Culled && !chunks[e.index].HasBuffers;
+        
+        chunkBufferAllocateRequests[e.index] = state != ChunkState.Culled && !chunks[e.index].HasBuffers; 
         chunkBufferClearRequests[e.index] = state == ChunkState.Culled && chunks[e.index].HasBuffers && e.currentDistance >= 2;
+        
         chunkStates[e.index] = state;
     }
 
@@ -334,6 +349,7 @@ public class GrassGenerator : MonoBehaviour
         { 
             GrassChunk chunk = chunks[i];
             
+            
             //Allocate buffer
             if (chunkBufferAllocateRequests[i])
             {
@@ -360,5 +376,21 @@ public class GrassGenerator : MonoBehaviour
                     Graphics.DrawMeshInstancedIndirect(chunk.LODMesh, 0, chunk.Material, chunk.Bounds, chunk.ArgsBufferLOD);
             }
         }
+    }
+    private void OnValidate()
+    {
+        if (!enabled || !gameObject.activeInHierarchy) return;
+
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.delayCall += () =>
+        {
+            if (this == null) return; // object may have been destroyed by the time this runs
+            ClearData();
+            UpdateData();
+        };
+        #else
+        ClearData();
+        UpdateData();
+        #endif
     }
 }

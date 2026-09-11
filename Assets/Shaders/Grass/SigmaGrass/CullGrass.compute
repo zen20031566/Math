@@ -38,7 +38,9 @@ float4 _DetailSplatMapChannels;
 [numthreads(128, 1, 1)]
 void Vote(uint3 id : SV_DispatchThreadID)
 {
-    float4 position = float4(_GrassDataBuffer[id.x].position.xyz, 1.0f);
+    GrassData grass = _GrassDataBuffer[id.x];
+    
+    float4 position = float4(grass.position.xyz, 1.0f);
     
     //transform point into clipspace by mul view projection matrix
     float4 clipspace = mul(MATRIX_VP, position); 
@@ -58,8 +60,17 @@ void Vote(uint3 id : SV_DispatchThreadID)
     //bool withinDistance = distance(_CameraPosition, position.xyz) < _MaxDrawDistance;
     
     //Detail map, only draw if density reaches the threshold of the detail map
+    float4 detailMap = _DetailMap.SampleLevel(_DetailMapPointClampSampler, grass.terrainUV, 0);
     
-    _VoteBuffer[id.x] = inView;
+    float detailThreshold = 
+    _DetailSplatMapChannels.r * detailMap.r 
+    + _DetailSplatMapChannels.g * detailMap.g
+    + _DetailSplatMapChannels.b * detailMap.b 
+    + _DetailSplatMapChannels.a * detailMap.a;
+    
+    bool passDetailThreshold = detailThreshold >= grass.densityThreshold;
+    
+    _VoteBuffer[id.x] = inView * passDetailThreshold;
 }
 
 //Each group will have 64 threads and each thread handles 2 vote elements

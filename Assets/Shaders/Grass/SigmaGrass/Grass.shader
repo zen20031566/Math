@@ -13,11 +13,12 @@ Shader "Basics/Grass"
         _FresnelPower("Fresnel Power", Range(1.0, 20.0)) = 4.0
         _FresnelStrength("Fresnel Strength", Range(0.0, 1.0)) = 0.15
         
+        _WindTexture("Wind Texture", 2D) = "white" {}
         _WindDirection("Wind Direction", Vector) = (1, 0 ,0)
         _WindStrength("Wind Strength", Float) = 0.5
         _WindSpeed("Wind Speed", Float) = 1
-        _WindTexture("Wind Texture", 2D) = "white" {}
-        _GrassBend("Grass Bend", Float) = 0.5
+         _WindScale("Wind Scale", Float) = 1
+          _GrassBend("Grass Bend", Float) = 0.5
         
     }
     SubShader
@@ -172,9 +173,8 @@ Shader "Basics/Grass"
                 grassGradient *= lerp(0.88, 1, colorNoise);
                 float3 finalColor = (ambient + diffuse) * grassGradient + highLights;
       
-                //return float4(finalColor, 1);
+                return float4(finalColor, 1);
                 
-                return _TopColor;
             }
             ENDHLSL
         }

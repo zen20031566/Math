@@ -11,6 +11,8 @@ struct GrassData
     float3 up;
     float3 forward;
     float2 scale;
+    float2 terrainUV;
+    float densityThreshold;
 };
 
 StructuredBuffer<GrassData> _GrassDataBuffer;
@@ -21,6 +23,7 @@ float _WindStrength;
 float _WindSpeed;
 float _GrassBend;
 float4 _WindTexture_ST;
+float _WindScale;
 CBUFFER_END
 
 TEXTURE2D(_WindTexture);
@@ -31,16 +34,17 @@ float3 GetGrassPosition(float3 positionOS,float2 uv, uint instanceID)
     //position from buffer
     GrassData grass = _GrassDataBuffer[instanceID];
     
-    // //forward direction is randomized and grass alligned to surface normal
-    // float4 facingRot = from_to_rotation(float3(0, 0, 1), grass.forward);
-    // float4 upRot = from_to_rotation(float3(0, 1, 0), grass.up);
-    // float4 grassRot = qmul(upRot, facingRot);
-    // float3 localPosition = rotate_vector(positionOS, grassRot);
-    //
-    // //scale
-    // localPosition.xz *= grass.scale.x;
-    // localPosition.y  *= grass.scale.y;
-    //
+    //forward direction is randomized and grass alligned to surface normal
+    float4 facingRot = from_to_rotation(float3(0, 0, 1), grass.forward);
+    float4 upRot = from_to_rotation(float3(0, 1, 0), grass.up);
+    float4 grassRot = qmul(upRot, facingRot);
+    float3 localPosition = rotate_vector(positionOS, grassRot);
+    
+    //scale
+    localPosition.xz *= grass.scale.x;
+    localPosition.y  *= grass.scale.y;
+    
+    
     // float2 xzOffset = (localPosition.y * localPosition.y) * 
     //     float2(
     //         randValue(grass.position.x + grass.position.z) * 2.0 - 1.0, 
@@ -66,11 +70,17 @@ float3 GetGrassPosition(float3 positionOS,float2 uv, uint instanceID)
     //
     // float originalY = localPosition.y; 
     // localPosition.y = sqrt(max(originalY * originalY - xzOffsetLen * xzOffsetLen, 0.0));
-    //
-    // float3 positionWS = grass.position.xyz + localPosition.xyz; //final 
     
-    float3 positionWS = grass.position.xyz + positionOS;
-
+    float2 windDir = normalize(_WindDirection);
+    float2 windUV = grass.position.xz + _Time.y * _WindSpeed * windDir * _WindScale;
+    float2 wind = SimplexNoise(windUV) * _WindStrength * uv.y;
+    
+    //localPosition.xz += wind;
+    float3 positionWS = grass.position.xyz + localPosition.xyz; //final 
+    
+    
+    //positionWS.xz += wind;
+    
     return positionWS;
 }
 
