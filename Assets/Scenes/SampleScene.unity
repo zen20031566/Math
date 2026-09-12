@@ -1312,7 +1312,7 @@ Light:
   serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 2.2
+  m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -1374,7 +1374,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.67880076, y: -0, z: -0, w: 0.7343225}
+  m_LocalRotation: {x: 0.3090169, y: -0, z: -0, w: 0.95105654}
   m_LocalPosition: {x: 0, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1847,7 +1847,7 @@ MonoBehaviour:
   directionalLight: {fileID: 410087040}
   cloudDome: {fileID: 477481449}
   cloudRotationSpeed: 1
-  timeOfDay: 11.7
+  timeOfDay: 8.4
   secondsPerGameHour: 600
   dayLightColor: {r: 1, g: 1, b: 1, a: 1}
   nightLightColor: {r: 0, g: 0, b: 0.5450981, a: 1}
