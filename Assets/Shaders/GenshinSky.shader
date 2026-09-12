@@ -370,6 +370,7 @@ Shader "Basics/GenshinSky"
 	        	{
 	        		 float3 inscattering = calcInScatteringLight(rayOrigin, viewWS, distThroughAtmosphere, mainLight.direction);
 					 scatteringColor = _MieColor * ACESFilm(inscattering) * _ScatteringStrength;
+	        		//scatteringColor = _MieColor * inscattering * _ScatteringStrength;
 	        	}
 
                 //Final 

@@ -61,13 +61,7 @@ void InitGrass(uint3 id : SV_DispatchThreadID)
     float2 jitter = hash22(seed) * 2.0 - 1.0; //remap to -1 to 1
     uv += jitter / _MapSize;
     
-    // float jitterX = randValue(threadIndex) * 2.0 - 1.0; //remap to -1 to 1
-    // float jitterY = randValue(threadIndex + 67) * 2.0 - 1.0;
-    // float2 jitter = float2(jitterX, jitterY);
-    // uv += jitter / _MapSize;
-    
     grass.terrainUV = uv;
-    
     
     //PosXZ
     float3 position = _TerrainPosition;
@@ -80,11 +74,6 @@ void InitGrass(uint3 id : SV_DispatchThreadID)
     
     position.y += height;
     grass.position = float4(position, 1.0);
-    
-    //Forward
-    // float angle = hash12(seed * 67) * 180;
-    // float3 forward = float3(cos(angle), 0, sin(angle));
-    // grass.forward = normalize(forward);
     
     //Forward
     float angle = hash12(seed) * UNITY_TWO_PI;
@@ -103,7 +92,7 @@ void InitGrass(uint3 id : SV_DispatchThreadID)
     
     //Density
     float stepSize = 1.0 / _GrassDensity; //gap in between thresholds
-    float jitterAmount = stepSize * 0.3; //how much easier it
+    float jitterAmount = stepSize * 0.4; //how much easier it
     float variation = -randValue(threadIndex) * jitterAmount;
     
     float baseThreshold = (threadIndex % _GrassDensity + 1) / (float)_GrassDensity;

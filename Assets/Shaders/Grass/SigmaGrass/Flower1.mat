@@ -24,12 +24,12 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseTexture:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 3e84cf8d9958cd340b6cf2c2edec3af6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WindTexture:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 9f2a885222e78414ea86bb96efe57223, type: 3}
+        m_Scale: {x: 0, y: 0}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
@@ -40,8 +40,8 @@ Material:
     - _SpecularFade: 1
     - _TipHighlightPower: 1
     - _WindScale: 1
-    - _WindSpeed: 1
-    - _WindStrength: 0.5
+    - _WindSpeed: 0.07
+    - _WindStrength: 0
     m_Colors:
     - _BottomColor: {r: 0.079999976, g: 0.24999997, b: 0.04, a: 1}
     - _HighlightColor: {r: 1, g: 1, b: 1, a: 1}

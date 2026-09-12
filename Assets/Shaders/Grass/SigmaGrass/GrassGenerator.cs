@@ -41,6 +41,7 @@ public struct GrassChunkData
 
 public enum ChunkState { Culled, FullRes, LOD }
 
+[ExecuteAlways]
 [RequireComponent(typeof(GrassPaintController))]
 public class GrassGenerator : MonoBehaviour
 {

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Flower1
   m_EditorClassIdentifier: Assembly-CSharp::SigmaGrassModel
   Mesh: {fileID: 3065602185505031582, guid: 34b2d42af8c21c34785994cb54d1cf2a, type: 3}
-  Material: {fileID: 2100000, guid: 2506e31e1e8215f419a2d3ae4dfbda72, type: 2}
+  Material: {fileID: 2100000, guid: 2dd4ab103b8267243a1a8f37746c872c, type: 2}
   LODMesh: {fileID: 3065602185505031582, guid: 34b2d42af8c21c34785994cb54d1cf2a, type: 3}
-  Scale: {x: 1, y: 1}
+  Scale: {x: 2, y: 2}
   ScaleVariationRange: {x: 0.6, y: 1}

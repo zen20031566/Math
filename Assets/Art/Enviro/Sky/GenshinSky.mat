@@ -33,7 +33,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
-  m_LockedProperties: 
+  m_LockedProperties: _DayBotColor _MoonTexture
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -130,7 +130,7 @@ Material:
     - _DayHorizonStrength: 1.03
     - _DayHorizonWidth: 0.24
     - _DensityFalloff: 222
-    - _DensityScaleHeight: 1.2
+    - _DensityScaleHeight: 1.39
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -161,7 +161,7 @@ Material:
     - _RayleighScaleHeight: 80
     - _ReceiveShadows: 1
     - _ReferenceHeight: 0.1
-    - _ScatteringStrength: 1.43
+    - _ScatteringStrength: 2.84
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -169,12 +169,12 @@ Material:
     - _SrcBlendAlpha: 1
     - _StarBlinkRate: 1
     - _StarNoiseScale: 12
-    - _SunInfScale: 0.14
+    - _SunInfScale: 0.01
     - _SunInnerBound: 0
     - _SunIntensity: 2
-    - _SunOuterBound: 0.1
+    - _SunOuterBound: 0.12
     - _SunRayLength: 10
-    - _SunSize: 0.03
+    - _SunSize: 0.013
     - _Surface: 0
     - _ViewRayLength: 10
     - _WorkflowMode: 1
@@ -193,7 +193,7 @@ Material:
     - _GalaxyColor1: {r: 0.172549, g: 0.49476203, b: 0.7529412, a: 1}
     - _GalaxyNoiseSpeed: {r: 0, g: 0.067, b: 0, a: 0}
     - _GalaxyNoiseSpeed2: {r: 0.05, g: 0.067, b: 0, a: 0}
-    - _MieColor: {r: 1.6055586, g: 0.75943094, b: 0.0062963082, a: 1}
+    - _MieColor: {r: 4.749623, g: 3.978684, b: 1.859522, a: 1}
     - _MoonColor: {r: 4, g: 5.8, b: 5.8, a: 1}
     - _NightBotColor: {r: 0.06020826, g: 0.13525337, b: 0.31132078, a: 1}
     - _NightHorizonColor: {r: 0, g: 0.29786563, b: 0.509434, a: 1}
@@ -204,7 +204,7 @@ Material:
     - _NoonTopColor: {r: 1, g: 0.5697733, b: 0.15566039, a: 1}
     - _RayLeighBeta: {r: 0.0058, g: 0.0135, b: 0.0331, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SunColor: {r: 38.93714, g: 23.589725, b: 5.3263087, a: 1}
-    - _SunInfColor: {r: 2.143547, g: 0.6494243, b: 0, a: 1}
+    - _SunColor: {r: 1825.2128, g: 1760.7546, b: 1541.0995, a: 1}
+    - _SunInfColor: {r: 5.2164745, g: 1.5804204, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -7,6 +7,7 @@ Shader "Basics/Grass"
         _HighlightColor("Highlight Color", Color) = (1, 1, 1, 1)
         _TipHighlightColor("Tip Highlight Color", Color) = (1, 1, 1, 1)
         _TipHighlightPower("Tip Highlight Power", Float) = 1
+        _ColorVariation("Color Variation", Color) = (1, 1, 1, 1)
         _Roughness("Roughness", Float) = 1
         _SpecularFade("SpecularFade", Float) = 1
         
@@ -69,6 +70,7 @@ Shader "Basics/Grass"
             float4 _HighlightColor;
             float4 _TipHighlightColor;
             float _TipHighlightPower;
+            float4 _ColorVariation;
             float _Roughness;
             float _SpecularFade;
             
@@ -168,9 +170,9 @@ Shader "Basics/Grass"
                 highLights += specular;
                 highLights = smoothstep(0, 1, highLights); //this fixes HDR overexposure
                 
-                 float  colorNoise = SimplexNoise(i.positionWS.xz * 0.05);
-                colorNoise = colorNoise * 0.5 + 0.5;
-                grassGradient *= lerp(0.88, 1, colorNoise);
+                //float  colorNoise = SimplexNoise(i.positionWS.xz * 0.06;
+                //colorNoise = colorNoise * 0.5 + 0.5;
+                //grassGradient *= lerp(0.88, 1, colorNoise);
                 float3 finalColor = (ambient + diffuse) * grassGradient + highLights;
       
                 return float4(finalColor, 1);
@@ -178,5 +180,122 @@ Shader "Basics/Grass"
             }
             ENDHLSL
         }
+
+        Pass
+        {
+            Tags
+            {
+                "LightMode" = "DepthOnly"
+            }
+
+            Cull Off
+            Zwrite On
+            ColorMask R
+
+            HLSLPROGRAM
+            #pragma vertex depthOnlyVert
+            #pragma fragment depthOnlyFrag
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "GrassCommon.hlsl"
+
+            struct appdata
+            {
+                float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float3 positionWS : TEXCOORD1;
+            };
+
+            v2f depthOnlyVert(appdata v, uint instanceID : SV_INSTANCEID)
+            {
+                v2f o = (v2f)0;
+
+                o.positionWS = GetGrassPosition(v.positionOS, v.uv, instanceID);
+                o.positionCS = TransformWorldToHClip(o.positionWS);
+
+                return o;
+            }
+
+            float depthOnlyFrag(v2f i) : SV_TARGET
+            {
+                return i.positionCS.z;
+            }
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            Cull Off
+            Zwrite On
+
+            HLSLPROGRAM
+            #pragma vertex depthNormalsVert
+            #pragma fragment depthNormalsFrag
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "GrassCommon.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+            float4 _TopColor;
+            float4 _BottomColor;
+            float4 _HighlightColor;
+            float4 _TipHighlightColor;
+            float _TipHighlightPower;
+            float _Roughness;
+            float _SpecularFade;
+            
+            float _FresnelPower;
+            float _FresnelStrength;
+            CBUFFER_END
+
+            struct appdata
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+                 float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float4 positionCS : SV_POSITION;
+                float3 normalWS : TEXCOORD0;
+                float2 uv : TEXCOORD1;
+                float3 positionWS : TEXCOORD2;
+            };
+
+            v2f depthNormalsVert(appdata v, uint instanceID : SV_INSTANCEID)
+            {
+                v2f o = (v2f)0;
+                
+                o.positionWS = GetGrassPosition(v.positionOS, v.uv, instanceID);
+                o.positionCS = TransformWorldToHClip(o.positionWS);
+                o.normalWS = TransformObjectToWorldNormal(_GrassDataBuffer[instanceID].up);
+
+                return o;
+            }
+
+            float4 depthNormalsFrag(v2f i) : SV_TARGET
+            {
+                float3 normalWS = NormalizeNormalPerPixel(i.normalWS);
+                
+                return float4(normalWS, 0.0f);
+            }
+
+            ENDHLSL
+        }
     }
 }
+
+
