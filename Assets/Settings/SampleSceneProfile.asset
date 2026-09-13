@@ -201,8 +201,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.WhiteBalance
   active: 1
   temperature:
-    m_OverrideState: 0
-    m_Value: 0.5
+    m_OverrideState: 1
+    m_Value: 12.1
   tint:
     m_OverrideState: 0
     m_Value: 0
@@ -410,10 +410,10 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: {x: 0.8017762, y: 0.8096703, z: 1, w: -0.07589939}
   midtones:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 1, y: 1, z: 1, w: 0.032}
   highlights:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 1, y: 1, z: 1, w: -0.038496494}
   shadowsStart:
     m_OverrideState: 0

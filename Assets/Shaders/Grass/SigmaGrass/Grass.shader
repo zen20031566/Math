@@ -170,7 +170,7 @@ Shader "Basics/Grass"
                 highLights += specular;
                 highLights = smoothstep(0, 1, highLights); //this fixes HDR overexposure
                 
-                //float  colorNoise = SimplexNoise(i.positionWS.xz * 0.06;
+                 //float  colorNoise = SimplexNoise(i.positionWS.xz * 0.06;
                 //colorNoise = colorNoise * 0.5 + 0.5;
                 //grassGradient *= lerp(0.88, 1, colorNoise);
                 float3 finalColor = (ambient + diffuse) * grassGradient + highLights;

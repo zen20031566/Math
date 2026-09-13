@@ -80,7 +80,7 @@ float3 GetGrassPosition(float3 positionOS,float2 uv, uint instanceID)
     windUV = TRANSFORM_TEX(windUV, _WindTexture);
     // float2 wind = SimplexNoise(windUV) * _WindStrength * uv.y;
     float4 windTex = SAMPLE_TEXTURE2D_LOD(_WindTexture, sampler_WindTexture, windUV, 0);
-    float2 wind = (windTex.rg * 2 - 1) * _WindStrength * uv.y;
+    float2 wind = (windTex.r * 2 - 1) * _WindStrength * uv.y;
     positionWS.xz += wind;
     
     return positionWS;

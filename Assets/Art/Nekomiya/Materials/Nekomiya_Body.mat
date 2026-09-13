@@ -614,7 +614,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ToonRamp:
-        m_Texture: {fileID: 2800000, guid: cef2a86bc931033429bec46f87e8dfb4, type: 3}
+        m_Texture: {fileID: 2800000, guid: ffe42359acdf6d64890467604ee5d463, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TruchetMask:
@@ -3582,7 +3582,7 @@ Material:
     - m_end_videoEffects: 0
     - m_end_voronoi: 0
     - m_lightingCategory: 1
-    - m_mainCategory: 1
+    - m_mainCategory: 0
     - m_modifierCategory: 0
     - m_raymarchingCategory: 0
     - m_renderingCategory: 0
